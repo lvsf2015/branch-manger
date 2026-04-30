@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icon/favicon.svg" />
+  <title>分支名生成器</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { overflow: hidden; height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      height: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* -------- 整体容器：左右布局 -------- */
+    .layout {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1100px;
+      height: 100%;
+      align-items: flex-start;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px 32px 28px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      border-top: 3px solid #4f46e5;
+    }
+    .panel-left  { flex: 0 0 420px; }
+    .panel-right { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+    h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      height: 88px;
+      padding: 10px 34px 10px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      color: #1a1a1a;
+    }
+    textarea:focus { border-color: #4f46e5; }
+
+    .input-clear {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      color: #9ca3af;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .input-clear:hover {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    .examples {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .example-tag {
+      font-size: 12px;
+      color: #4f46e5;
+      background: #ede9fe;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .example-tag:hover { background: #ddd6fe; }
+
+    .gen-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 14px rgba(79, 70, 229, 0.38);
+      letter-spacing: 0.5px;
+    }
+    .gen-btn:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      box-shadow: 0 5px 18px rgba(79, 70, 229, 0.48);
+      transform: translateY(-1px);
+    }
+    .gen-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3); }
+
+    .result-box { margin-top: 18px; display: none; }
+    .result-label { font-size: 13px; color: #555; margin-bottom: 6px; }
+    .result-content { display: flex; align-items: center; gap: 8px; }
+    .result-text {
+      flex: 1;
+      padding: 10px 12px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      color: #1a1a1a;
+      word-break: break-all;
+    }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #fff;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.32);
+    }
+    .copy-btn:hover { background: linear-gradient(135deg, #4338ca, #6d28d9); box-shadow: 0 3px 12px rgba(79, 70, 229, 0.44); transform: translateY(-1px); }
+    .copy-btn.copied { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.32); }
+
+    .error-msg { margin-top: 8px; font-size: 13px; color: #ef4444; display: none; }
+
+    /* -------- 右侧：历史记录 -------- */
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .history-header h1 { margin-bottom: 0; }
+    .history-count { font-size: 12px; color: #bbb; margin-left: 6px; font-weight: 400; }
+
+    /* 进度条 */
+    .quota-wrap {
+      display: flex; align-items: center; gap: 8px;
+      margin-left: 12px; flex: 1; min-width: 0;
+    }
+    .quota-bar-track {
+      flex: 1; height: 7px; background: #e5e7eb;
+      border-radius: 99px; overflow: hidden; min-width: 80px; max-width: 140px;
+    }
+    .quota-bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #34d399, #10b981);
+      border-radius: 99px;
+      transition: width 0.4s ease, background 0.3s;
+    }
+    .quota-bar-fill.warn   { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .quota-bar-fill.danger { background: linear-gradient(90deg, #f87171, #ef4444); }
+    .quota-label {
+      font-size: 12px; font-weight: 700; color: #6b7280; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.2px;
+    }
+    .quota-label.warn   { color: #f59e0b; }
+    .quota-label.danger { color: #ef4444; }
+
+    /* 阈值配置行 */
+    .threshold-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px; font-size: 12px; color: #888;
+    }
+    .threshold-bar label { flex-shrink: 0; }
+    .threshold-input {
+      width: 60px; padding: 3px 6px; border: 1px solid #d9d9d9;
+      border-radius: 6px; font-size: 12px; color: #333; outline: none;
+      text-align: center; transition: border-color 0.2s;
+    }
+    .threshold-input:focus { border-color: #4f46e5; }
+    .threshold-hint { color: #bbb; }
+
+    .clear-btn {
+      font-size: 12px;
+      color: #aaa;
+      background: none;
+      border: 1px solid #e8e8e8;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .clear-btn:hover { color: #ef4444; border-color: #fca5a5; background: #fef2f2; }
+
+    /* 搜索框 */
+    .search-wrap { position: relative; margin-bottom: 10px; }
+    .search-input {
+      width: 100%;
+      padding: 8px 28px 8px 32px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      color: #1a1a1a;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: #4f46e5; }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bbb;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bbb;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+      line-height: 1;
+      user-select: none;
+    }
+    .search-clear:hover { color: #888; }
+
+    /* 日期筛选栏 */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      padding: 6px 10px;
+      background: #f9f9fb;
+      border: 1px solid #ebebf0;
+      border-radius: 8px;
+    }
+    .filter-label { font-size: 12px; color: #888; flex-shrink: 0; }
+    .date-input {
+      padding: 5px 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #333;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .date-input:focus { border-color: #4f46e5; }
+    .filter-sep { font-size: 12px; color: #bbb; }
+    .filter-reset {
+      font-size: 12px; color: #bbb; background: none; border: none;
+      cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+    }
+    .filter-reset:hover { color: #4f46e5; }
+
+    /* 一键展开/折叠按钮 */
+    .toggle-all-btn {
+      font-size: 12px; color: #4f46e5; background: #ede9fe;
+      border: 1px solid #c4b5fd; cursor: pointer; padding: 4px 12px;
+      border-radius: 6px; transition: all 0.15s; white-space: nowrap;
+      font-weight: 500; margin-left: auto;
+    }
+    .toggle-all-btn:hover { background: #ddd6fe; border-color: #a78bfa; color: #3730a3; }
+
+    /* 日期分组标题 */
+    .date-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+      padding: 10px 6px 6px;
+      border-bottom: 1px solid #e8e8e8;
+      margin-top: 6px;
+      cursor: pointer;
+      user-select: none;
+      letter-spacing: 0.3px;
+    }
+    .date-group-header:hover { color: #4f46e5; }
+    .date-group-arrow {
+      font-size: 10px;
+      color: #aaa;
+      transition: transform 0.2s;
+      margin-left: 4px;
+    }
+    .date-group-header.collapsed .date-group-arrow { transform: rotate(-90deg); }
+    .date-group-items { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+    .date-group-items.collapsed { display: none; }
+
+    /* 导出按钮 */
+    .export-btn {
+      font-size: 12px; color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none; cursor: pointer; padding: 5px 12px;
+      border-radius: 6px; transition: all 0.15s; font-weight: 500;
+      box-shadow: 0 1px 6px rgba(79, 70, 229, 0.28);
+    }
+    .export-btn:hover { background: linear-gradient(135deg, #4338ca, #6d28d9); box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4); transform: translateY(-1px); }
+
+    /* 历史列表 */
+    .history-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      scrollbar-gutter: stable;
+    }
+    .history-list:hover {
+      scrollbar-color: #c4b5fd #f3f0ff;
+    }
+    .history-list::-webkit-scrollbar { width: 6px; }
+    .history-list::-webkit-scrollbar-track { background: transparent; border-radius: 8px; }
+    .history-list::-webkit-scrollbar-thumb { background: transparent; border-radius: 8px; transition: background 0.2s; }
+    .history-list:hover::-webkit-scrollbar-track { background: #f3f0ff; }
+    .history-list:hover::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #a78bfa, #7c3aed); }
+    .history-list:hover::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #7c3aed, #6d28d9); }
+    .history-empty { font-size: 13px; color: #bbb; text-align: center; padding: 40px 0; }
+    .history-item {
+      padding: 9px 11px;
+      background: #fafafa;
+      border: 1px solid #efefef;
+      border-radius: 8px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .history-item:hover { background: #f5f3ff; border-color: #c4b5fd; border-left-color: #7c3aed; }
+    .hi-meta-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .hi-time { font-size: 12px; color: #5b21b6; font-weight: 700; }
+    .hi-content-row { display: flex; align-items: center; gap: 2px; margin-bottom: 3px; }
+    .hi-content-row:last-child { margin-bottom: 0; }
+    .hi-title-text {
+      font-size: 12px; color: #666;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+    }
+    .hi-branch-text {
+      font-size: 12px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      color: #1a1a1a;
+      word-break: break-all;
+      flex: 1;
+    }
+    .hi-icon-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0;
+      transition: background 0.15s;
+    }
+    .hi-icon-btn img { transition: opacity 0.15s; }
+    .hi-icon-btn:hover { background: #ede9fe; }
+    .hi-icon-btn:hover img { opacity: 1 !important; filter: invert(31%) sepia(90%) saturate(600%) hue-rotate(220deg); }
+    .hi-icon-btn.copied img { opacity: 1 !important; filter: invert(52%) sepia(60%) saturate(500%) hue-rotate(120deg); }
+    .hi-del-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0;
+      transition: background 0.15s;
+    }
+    .hi-del-btn img { transition: opacity 0.15s; }
+    .hi-del-btn:hover { background: #fef2f2; }
+    .hi-del-btn:hover img { opacity: 1 !important; filter: invert(35%) sepia(80%) saturate(600%) hue-rotate(330deg); }
+    .hi-del-btn.pending { background: #fef2f2; }
+    .hi-del-btn.pending img { opacity: 1 !important; filter: invert(35%) sepia(80%) saturate(600%) hue-rotate(330deg); }
+    mark { background: #fde68a; color: inherit; border-radius: 2px; padding: 0 1px; }
+
+    /* -------- 弹窗 -------- */
+    .modal-mask {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-mask.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px 24px;
+      width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    }
+    .modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px; color: #1a1a1a; }
+    .modal p  { font-size: 13px; color: #555; line-height: 1.6; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .modal-btn {
+      padding: 7px 18px;
+      border-radius: 7px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #333;
+      transition: all 0.15s;
+    }
+    .modal-btn:hover { border-color: #999; }
+    .modal-btn.danger  { background: #ef4444; border-color: #ef4444; color: #fff; }
+    .modal-btn.danger:hover  { background: #dc2626; border-color: #dc2626; }
+    .modal-btn.primary { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+    .modal-btn.primary:hover { background: #4338ca; border-color: #4338ca; }
+
+    /* -------- Toast 提示 -------- */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 280px;
+      max-width: 480px;
+      padding: 12px 20px 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #e1f3d8;
+      border-left: 4px solid #67c23a;
+      background: #f0f9eb;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      font-size: 14px;
+      color: #606266;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.toast-warning { pointer-events: auto; }
+    .toast-close {
+      display: none; margin-left: 8px; flex-shrink: 0;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.15); background: rgba(0,0,0,0.06);
+      cursor: pointer; align-items: center; justify-content: center;
+      font-size: 12px; color: #888; line-height: 1;
+      transition: background 0.15s;
+    }
+    .toast-close:hover { background: rgba(0,0,0,0.14); color: #555; }
+    .toast.toast-warning .toast-close { display: flex; }
+    .toast-icon {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #67c23a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toast-icon svg { display: block; }
+    .toast.toast-error { border-color: #fde2e2; border-left-color: #f56c6c; background: #fef0f0; }
+    .toast.toast-error .toast-icon { background: #f56c6c; }
+    .toast.toast-warning { border-color: #faecd8; border-left-color: #e6a23c; background: #fdf6ec; }
+    .toast.toast-warning .toast-icon { background: #e6a23c; }
+
+    /* -------- 自定义复制浮窗 -------- */
+    .ccp-popup {
+      position: fixed;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid #e5e7eb;
+      padding: 14px 16px 12px;
+      width: 300px;
+      z-index: 500;
+      display: none;
+    }
+    .ccp-popup.show { display: block; }
+    .ccp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+    }
+    .ccp-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+    .ccp-close {
+      width: 22px; height: 22px; background: none; border: none; cursor: pointer;
+      font-size: 16px; color: #aaa; line-height: 1; display: flex;
+      align-items: center; justify-content: center; border-radius: 4px;
+    }
+    .ccp-close:hover { background: #f3f4f6; color: #555; }
+    .ccp-section { margin-bottom: 8px; }
+    .ccp-label {
+      font-size: 11px; color: #888; font-weight: 600; margin-bottom: 5px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .ccp-options { display: flex; flex-wrap: wrap; gap: 5px; }
+    .ccp-chip {
+      font-size: 12px; padding: 3px 9px; border-radius: 12px;
+      border: 1px solid #e5e7eb; background: #f9fafb; cursor: pointer;
+      user-select: none; color: #555; transition: all 0.12s;
+    }
+    .ccp-chip:hover { border-color: #a78bfa; color: #4f46e5; background: #f5f3ff; }
+    .ccp-chip.selected { background: #ede9fe; border-color: #a78bfa; color: #4f46e5; font-weight: 500; }
+    .ccp-footer { margin-top: 10px; display: flex; justify-content: flex-end; gap: 6px; }
+    .ccp-cancel-btn {
+      padding: 6px 14px; background: #f3f4f6; color: #666;
+      border: none; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .ccp-cancel-btn:hover { background: #e5e7eb; }
+    .ccp-copy-btn {
+      padding: 6px 16px; background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff; border: none; border-radius: 6px; font-size: 12px;
+      font-weight: 500; cursor: pointer; box-shadow: 0 1px 6px rgba(79,70,229,0.28);
+      transition: all 0.15s;
+    }
+    .ccp-copy-btn:hover { background: linear-gradient(135deg, #4338ca, #6d28d9); }
+
+    /* -------- 分支服务浮窗 -------- */
+    .bsp-popup {
+      position: fixed;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      width: 168px;
+      z-index: 500;
+      display: none;
+    }
+    .bsp-popup.show { display: block; }
+    .bsp-option {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 12px;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .bsp-option:hover {
+      background: #f5f3ff;
+      color: #4f46e5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 左侧：生成器 -->
+  <div class="panel panel-left">
+    <h1>🌿 分支名生成器</h1>
+
+    <label>Bug 描述（编号 + 标题）</label>
+    <div class="input-wrap">
+      <textarea id="input" placeholder="例：16453【奔驰环境】lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"></textarea>
+      <span class="input-clear" id="inputClear" title="清空">×</span>
+    </div>
+
+    <div class="examples">
+      <span class="example-tag" data-v="16453【奔驰环境】lightning版本审批步骤中缺少审批通过操作">奔驰示例</span>
+      <span class="example-tag" data-v="16453【移远环境】报表前端导出顺序异常需要修复">移远示例</span>
+      <span class="example-tag" data-v="16453【生产环境】用户登录报错无法访问">其他示例</span>
+      <span class="example-tag" data-v="1234【奔驰环境】非5位编号Dev示例">Dev示例</span>
+    </div>
+
+    <div class="error-msg" id="error">请输入 Bug 描述</div>
+
+    <button class="gen-btn" id="genBtn">生 成</button>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-label">生成结果</div>
+      <div class="result-content">
+        <div class="result-text" id="resultText"></div>
+        <button class="copy-btn" id="copyBtn">复制</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：历史记录 -->
+  <div class="panel panel-right">
+    <div class="history-header">
+      <h1 style="display:flex;align-items:center;min-width:0;flex:1;">
+        📋 历史记录<span class="history-count" id="historyCount"></span>
+        <span class="quota-wrap" id="historyQuota" style="display:none;">
+          <span class="quota-bar-track"><span class="quota-bar-fill" id="quotaBarFill"></span></span>
+          <span class="quota-label" id="quotaLabel"></span>
+        </span>
+      </h1>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="export-btn" id="exportBtn">导出</button>
+        <button class="clear-btn" id="clearBtn">清空</button>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" placeholder="搜索标题或分支名…" />
+      <span class="search-clear" id="searchClear">×</span>
+    </div>
+
+    <div class="threshold-bar">
+      <label for="thresholdInput">提醒阈值</label>
+      <input class="threshold-input" type="number" id="thresholdInput" min="1" max="500" value="80" />
+      <span class="threshold-hint">条，超出后创建分支时提示备份清理</span>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">日期</span>
+      <input class="date-input" type="date" id="dateFrom" />
+      <span class="filter-sep">—</span>
+      <input class="date-input" type="date" id="dateTo" />
+      <button class="filter-reset" id="dateReset">重置</button>
+      <button class="toggle-all-btn" id="toggleAllBtn">折叠全部</button>
+    </div>
+
+    <div class="history-list" id="historyList">
+      <div class="history-empty">暂无历史记录</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 分支服务复制浮窗 -->
+<div id="branchServicesPopup" class="bsp-popup">
+  <button class="bsp-option" data-service-key="setup-web">setup-web</button>
+  <button class="bsp-option" data-service-key="setup-web+svc">setup-web+svc</button>
+  <button class="bsp-option" data-service-key="main-web">main-web</button>
+  <button class="bsp-option" data-service-key="main-web+svc">main-web+svc</button>
+  <button class="bsp-option" data-service-key="all">all</button>
+</div>
+
+<!-- 自定义复制浮窗 -->
+<div id="ccpPopup" class="ccp-popup">
+  <div class="ccp-header">
+    <span class="ccp-title">自定义负责人</span>
+    <button class="ccp-close" id="ccpClose">×</button>
+  </div>
+  <div class="ccp-section">
+    <div class="ccp-label">前端</div>
+    <div class="ccp-options" id="ccpFrontend">
+      <span class="ccp-chip" data-name="吕帅锋">吕帅锋</span>
+      <span class="ccp-chip" data-name="陈文才">陈文才</span>
+      <span class="ccp-chip" data-name="贺文娟">贺文娟</span>
+      <span class="ccp-chip" data-name="张凤">张凤</span>
+      <span class="ccp-chip" data-name="徐宏明">徐宏明</span>
+    </div>
+  </div>
+  <div class="ccp-section">
+    <div class="ccp-label">后端</div>
+    <div class="ccp-options" id="ccpBackend">
+      <span class="ccp-chip" data-name="赵继绪">赵继绪</span>
+      <span class="ccp-chip" data-name="王荟清">王荟清</span>
+      <span class="ccp-chip" data-name="张兴建">张兴建</span>
+      <span class="ccp-chip" data-name="胡飞">胡飞</span>
+      <span class="ccp-chip" data-name="叶振东">叶振东</span>
+      <span class="ccp-chip" data-name="赵晨宇">赵晨宇</span>
+      <span class="ccp-chip" data-name="刘忠堂">刘忠堂</span>
+      <span class="ccp-chip" data-name="山长鲁">山长鲁</span>
+    </div>
+  </div>
+  <div class="ccp-section">
+    <div class="ccp-label">测试</div>
+    <div class="ccp-options" id="ccpTester">
+      <span class="ccp-chip" data-name="李韶娜">李韶娜</span>
+      <span class="ccp-chip" data-name="赵仰杰">赵仰杰</span>
+      <span class="ccp-chip" data-name="吕帅锋">吕帅锋</span>
+      <span class="ccp-chip" data-name="杨凌宇">杨凌宇</span>
+      <span class="ccp-chip" data-name="关帅">关帅</span>
+      <span class="ccp-chip" data-name="陈文才">陈文才</span>
+      <span class="ccp-chip" data-name="贺文娟">贺文娟</span>
+      <span class="ccp-chip" data-name="张凤">张凤</span>
+      <span class="ccp-chip" data-name="徐宏明">徐宏明</span>
+    </div>
+  </div>
+  <div class="ccp-footer">
+    <button class="ccp-cancel-btn" id="ccpCancel">取消</button>
+    <button class="ccp-copy-btn" id="ccpCopyBtn">复制</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+      <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+  <span class="toast-text" id="toastText"></span>
+  <span class="toast-close" id="toastClose" title="关闭">×</span>
+</div>
+
+<!-- 单条删除确认弹窗 -->
+<div class="modal-mask" id="delModal">
+  <div class="modal">
+    <h2>删除记录</h2>
+    <p id="delModalDesc">确认删除这条记录？</p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="cancelDel">取消</button>
+      <button class="modal-btn danger" id="confirmDel">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 清空确认弹窗 -->
+<div class="modal-mask" id="clearModal">
+  <div class="modal">
+    <h2>清空历史记录</h2>
+    <p>是否在清空前将所有历史记录导出为 Markdown 文件？</p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="cancelClear">取消</button>
+      <button class="modal-btn danger" id="confirmClearOnly">直接清空</button>
+      <button class="modal-btn primary" id="confirmExportClear">导出并清空</button>
+    </div>
+  </div>
+</div>
+
+<script src="history.js"></script>
+<script>
+// ---------- 核心逻辑（与 gb.js 保持一致）----------
+
+function formatDate(date) {
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${m}${d}`;
+}
+
+function extractId(desc) {
+  const match = desc.match(/^(\d+)/);
+  return match ? match[1] : 'unknown';
+}
+
+function extractSummary(desc) {
+  let text = desc.replace(/^\d+/, '');
+  text = text.replace(/[【\[（(][^】\]）)]*[】\]）)]/g, '');
+
+  const cnChars = (text.match(/[\u4e00-\u9fff]/g) || []).slice(0, 20).join('');
+  if (cnChars.length > 0) return cnChars;
+
+  const engTokens = (text.match(/[a-zA-Z][a-zA-Z0-9]*/g) || [])
+    .map(t => t.toLowerCase())
+    .slice(0, 5);
+  return engTokens.length > 0 ? engTokens.join('-') : 'fix';
+}
+
+function detectEnv(desc) {
+  if (/移远/.test(desc)) return 'yiyuan';
+  if (/奔驰/.test(desc)) return 'benchi';
+  if (/海外|国外/.test(desc)) return 'max';
+  return 'other';
+}
+
+function generateBranchName(bugDesc) {
+  const id      = extractId(bugDesc);
+  const summary = extractSummary(bugDesc);
+  const date    = formatDate(new Date());
+  const env     = detectEnv(bugDesc);
+  const author  = 'lvshuaif';
+  const tag     = /^\d{5}$/.test(id) ? 'Fix' : 'Dev';
+
+  switch (env) {
+    case 'yiyuan': return `yiyuan-master-A-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'benchi': return `benchi-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'max':    return `max-master-A-${tag}-${id}-${author}-${date}-${summary}`;
+    default:       return `one-master-A-${tag}-${id}-${author}-${date}-${summary}`;
+  }
+}
+
+// 历史记录逻辑由 history.js 提供
+
+// ---------- 复制 ----------
+
+// ---------- Toast ----------
+let _toastTimer = null;
+function showToast(msg, type) {
+  const el   = document.getElementById('toast');
+  const text = document.getElementById('toastText');
+  text.textContent = msg;
+  el.classList.remove('toast-error', 'toast-warning');
+  if (type === 'error')   el.classList.add('toast-error');
+  if (type === 'warning') el.classList.add('toast-warning');
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = type === 'warning'
+    ? null
+    : setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function copyText(text, btn, toastMsg) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn.classList.contains('hi-icon-btn')) {
+      btn.classList.add('copied');
+      setTimeout(() => { btn.classList.remove('copied'); }, 1500);
+    } else {
+      const prev = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
+    }
+    showToast(toastMsg || '已复制 ✓');
+  });
+}
+
+// 点击关闭按钮手动关闭 warning Toast
+document.getElementById('toastClose').addEventListener('click', () => {
+  document.getElementById('toast').classList.remove('show');
+});
+
+// ---------- 单条删除弹窗 ----------
+let _pendingDelBranch = null;
+document.getElementById('cancelDel').addEventListener('click', () => {
+  document.getElementById('delModal').classList.remove('show');
+  _pendingDelBranch = null;
+});
+document.getElementById('confirmDel').addEventListener('click', () => {
+  document.getElementById('delModal').classList.remove('show');
+  if (_pendingDelBranch) { deleteHistory(_pendingDelBranch); showToast('删除成功'); }
+  _pendingDelBranch = null;
+});
+document.getElementById('delModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) { e.currentTarget.classList.remove('show'); _pendingDelBranch = null; }
+});
+
+function openDelModal(branch, titleText) {
+  _pendingDelBranch = branch;
+  document.getElementById('delModalDesc').textContent = `确认删除：${titleText || branch}？`;
+  document.getElementById('delModal').classList.add('show');
+}
+
+// ---------- 导出 Markdown ----------
+
+function exportMarkdown(suffix) {
+  const list = loadHistory();
+  if (list.length === 0) return;
+
+  // 按日期分组（倒序）
+  const WEEK = ['日','一','二','三','四','五','六'];
+  const groups = {};
+  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(item => {
+    const d = new Date(item.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    (groups[key] = groups[key] || []).push(item);
+  });
+
+  const lines = [
+    '# 分支名历史记录',
+    '',
+    `> 导出时间：${new Date().toLocaleString('zh-CN')}　共 ${list.length} 条`,
+  ];
+
+  Object.keys(groups).sort((a, b) => b.localeCompare(a)).forEach(dateKey => {
+    const d = new Date(dateKey + 'T00:00:00');
+    const label = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 周${WEEK[d.getDay()]}`;
+    lines.push('', `## ${label}  (${groups[dateKey].length})`);
+    groups[dateKey].forEach(item => {
+      const d2 = new Date(item.createdAt);
+      const hhmm = `${String(d2.getHours()).padStart(2,'0')}:${String(d2.getMinutes()).padStart(2,'0')}`;
+      lines.push(
+        '',
+        `**${hhmm}**`,
+        `${item.title}`,
+        `\`${item.branch}\``,
+      );
+    });
+  });
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  const _now = new Date();
+  const _pad = n => String(n).padStart(2, '0');
+  const _ts  = `${_now.getFullYear()}${_pad(_now.getMonth()+1)}${_pad(_now.getDate())}${_pad(_now.getHours())}${_pad(_now.getMinutes())}${_pad(_now.getSeconds())}`;
+  a.download = `branch-history-${_ts}${suffix || ''}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---------- 事件绑定 ----------
+
+document.getElementById('genBtn').addEventListener('click', () => {
+  const input      = document.getElementById('input');
+  const errEl      = document.getElementById('error');
+  const resultBox  = document.getElementById('resultBox');
+  const resultText = document.getElementById('resultText');
+
+  const desc = input.value.trim();
+  if (!desc) {
+    errEl.style.display = 'block';
+    resultBox.style.display = 'none';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const branch = generateBranchName(desc);
+  resultText.textContent = branch;
+  resultBox.style.display = 'block';
+
+  navigator.clipboard.writeText(branch).catch(() => {});
+  addHistory(desc, branch);
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  copyText(document.getElementById('resultText').textContent, document.getElementById('copyBtn'));
+});
+
+const mainInput = document.getElementById('input');
+const inputClear = document.getElementById('inputClear');
+
+function syncMainInputClear() {
+  inputClear.style.display = mainInput.value.trim() ? 'flex' : 'none';
+}
+
+mainInput.addEventListener('input', () => {
+  document.getElementById('error').style.display = 'none';
+  syncMainInputClear();
+});
+
+inputClear.addEventListener('click', () => {
+  mainInput.value = '';
+  document.getElementById('error').style.display = 'none';
+  syncMainInputClear();
+  mainInput.focus();
+});
+
+// 清空按钮 → 弹窗
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (loadHistory().length === 0) return;
+  document.getElementById('clearModal').classList.add('show');
+});
+
+document.getElementById('cancelClear').addEventListener('click', () => {
+  document.getElementById('clearModal').classList.remove('show');
+});
+
+document.getElementById('confirmClearOnly').addEventListener('click', () => {
+  document.getElementById('clearModal').classList.remove('show');
+  clearHistory();
+  showToast('历史记录已清空');
+});
+
+document.getElementById('confirmExportClear').addEventListener('click', () => {
+  document.getElementById('clearModal').classList.remove('show');
+  exportMarkdown();
+  clearHistory();
+  showToast('已导出并清空');
+});
+
+// 点击遮罩关闭弹窗
+document.getElementById('clearModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('show');
+});
+
+// 示例标签
+document.querySelectorAll('.example-tag').forEach(el => {
+  el.addEventListener('click', () => {
+    mainInput.value = el.dataset.v;
+    document.getElementById('error').style.display = 'none';
+    syncMainInputClear();
+  });
+});
+
+// ---------- 筛选 ----------
+
+function applyFilters() {
+  const kw   = document.getElementById('searchInput').value.trim();
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  renderHistory(kw, from, to);
+}
+
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+
+searchInput.addEventListener('input', () => {
+  searchClear.style.display = searchInput.value.trim() ? 'block' : 'none';
+  applyFilters();
+});
+
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  searchClear.style.display = 'none';
+  applyFilters();
+});
+
+document.getElementById('dateFrom').addEventListener('change', applyFilters);
+document.getElementById('dateTo').addEventListener('change', applyFilters);
+document.getElementById('dateReset').addEventListener('click', () => {
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  applyFilters();
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => exportMarkdown());
+syncMainInputClear();
+
+// 一键展开/折叠
+document.getElementById('toggleAllBtn').addEventListener('click', () => {
+  const ul = document.getElementById('historyList');
+  const headers = ul.querySelectorAll('.date-group-header');
+  if (headers.length === 0) return;
+  const hasCollapsed = ul.querySelector('.date-group-header.collapsed');
+  headers.forEach(header => {
+    const key   = header.dataset.group;
+    const items = ul.querySelector(`.date-group-items[data-group-items="${key}"]`);
+    if (hasCollapsed) {
+      header.classList.remove('collapsed');
+      items.classList.remove('collapsed');
+    } else {
+      header.classList.add('collapsed');
+      items.classList.add('collapsed');
+    }
+  });
+  updateToggleAllBtn();
+});
+
+// ---------- 阈值配置 ----------
+const THRESHOLD_KEY = 'gb_threshold';
+
+function getThreshold() {
+  const v = parseInt(localStorage.getItem(THRESHOLD_KEY), 10);
+  return (!isNaN(v) && v > 0) ? v : 80;
+}
+
+function setThreshold(v) {
+  localStorage.setItem(THRESHOLD_KEY, String(v));
+}
+
+function checkQuotaWarning(count) {
+  const threshold = getThreshold();
+  if (count < threshold) return;
+  const pct = Math.round(count / HISTORY_MAX * 100);
+  if (typeof showToast === 'function') {
+    showToast(`历史记录已达 ${count} 条（${pct}%），建议导出备份后清理`, 'warning');
+  }
+}
+
+function updateQuotaColor(count) {
+  const wrap  = document.getElementById('historyQuota');
+  const fill  = document.getElementById('quotaBarFill');
+  const label = document.getElementById('quotaLabel');
+  if (!wrap || !fill || !label) return;
+  if (count <= 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+  const pct       = Math.min(100, Math.round(count / HISTORY_MAX * 100));
+  const threshold = getThreshold();
+  const level     = count >= threshold ? (pct >= 90 ? 'danger' : 'warn') : '';
+  fill.style.width = pct + '%';
+  fill.className   = 'quota-bar-fill' + (level ? ' ' + level : '');
+  label.className  = 'quota-label'    + (level ? ' ' + level : '');
+  label.textContent = `${count} / ${HISTORY_MAX}`;
+}
+
+// 阈值输入框初始化与监听
+const thresholdInput = document.getElementById('thresholdInput');
+thresholdInput.value = getThreshold();
+thresholdInput.addEventListener('change', () => {
+  const v = parseInt(thresholdInput.value, 10);
+  if (!isNaN(v) && v > 0 && v <= HISTORY_MAX) {
+    setThreshold(v);
+    updateQuotaColor(loadHistory().length);
+  } else {
+    thresholdInput.value = getThreshold();
+  }
+});
+
+// ---------- 分支服务复制浮窗 ----------
+let _bspBranch = '';
+let _bspBtn = null;
+
+const BRANCH_SERVICE_MAP = {
+  'setup-web': ['setup-web'],
+  'setup-web+svc': ['setup-web', 'setup-svc'],
+  'main-web': ['main-web'],
+  'main-web+svc': ['main-web', 'main-svc'],
+  all: ['main-web', 'setup-web', 'main-svc', 'setup-svc'],
+};
+
+function openBranchServicesPopup(btn, branch) {
+  _bspBranch = branch;
+  _bspBtn = btn;
+  const popup = document.getElementById('branchServicesPopup');
+  popup.classList.add('show');
+
+  const rect = btn.getBoundingClientRect();
+  const pw = 168;
+  const ph = popup.offsetHeight || 210;
+  let left = rect.right + 8;
+  let top = rect.top;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
+  if (top < 8) top = 8;
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+}
+
+function closeBranchServicesPopup() {
+  document.getElementById('branchServicesPopup').classList.remove('show');
+  _bspBranch = '';
+  _bspBtn = null;
+}
+
+function buildBranchServicesText(branch, serviceKey) {
+  const services = BRANCH_SERVICE_MAP[serviceKey] || BRANCH_SERVICE_MAP.all;
+  return `分支：${branch}\n涉及服务：${services.join(' ')}`;
+}
+
+document.querySelectorAll('#branchServicesPopup .bsp-option').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const text = buildBranchServicesText(_bspBranch, btn.dataset.serviceKey);
+    copyText(text, _bspBtn || btn, '分支和涉及服务已复制');
+    closeBranchServicesPopup();
+  });
+});
+
+// ---------- 自定义复制浮窗 ----------
+let _ccpTitle = '';
+let _ccpBranch = '';
+
+function openCustomCopyPopup(btn, title, branch) {
+  _ccpTitle  = title;
+  _ccpBranch = branch;
+  const popup = document.getElementById('ccpPopup');
+
+  // 每次打开重置所有选中，然后默认选前端第一个 + 测试第一个
+  popup.querySelectorAll('.ccp-chip').forEach(c => c.classList.remove('selected'));
+  const firstFe = popup.querySelector('#ccpFrontend .ccp-chip');
+  const firstTe = popup.querySelector('#ccpTester   .ccp-chip');
+  if (firstFe) firstFe.classList.add('selected');
+  if (firstTe) firstTe.classList.add('selected');
+
+  popup.classList.add('show');
+
+  // 定位到按钮右侧
+  const rect = btn.getBoundingClientRect();
+  const pw = 300, ph = popup.offsetHeight || 340;
+  let left = rect.right + 8;
+  let top  = rect.top;
+  // 超出右边界则贴右
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  // 超出底部则上移
+  if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
+  if (top < 8) top = 8;
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+}
+
+function closeCcpPopup() {
+  document.getElementById('ccpPopup').classList.remove('show');
+}
+
+document.getElementById('ccpClose').addEventListener('click', closeCcpPopup);
+document.getElementById('ccpCancel').addEventListener('click', closeCcpPopup);
+
+// chip 点击切换
+document.querySelectorAll('.ccp-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+// 点击弹窗外关闭
+document.addEventListener('click', e => {
+  const branchPopup = document.getElementById('branchServicesPopup');
+  if (branchPopup.classList.contains('show') &&
+      !branchPopup.contains(e.target) &&
+      !e.target.closest('.hi-copy-branch-services-btn')) {
+    closeBranchServicesPopup();
+  }
+
+  const popup = document.getElementById('ccpPopup');
+  if (!popup.classList.contains('show')) return;
+  if (!popup.contains(e.target) && !e.target.closest('.hi-custom-copy-btn')) closeCcpPopup();
+}, true);
+
+// 复制
+document.getElementById('ccpCopyBtn').addEventListener('click', () => {
+  const fe = Array.from(document.querySelectorAll('#ccpFrontend .ccp-chip.selected')).map(c => c.dataset.name);
+  const be = Array.from(document.querySelectorAll('#ccpBackend  .ccp-chip.selected')).map(c => c.dataset.name);
+  const te = Array.from(document.querySelectorAll('#ccpTester   .ccp-chip.selected')).map(c => c.dataset.name);
+  const parts = [];
+  if (fe.length) parts.push('前端：' + fe.join('、'));
+  if (be.length) parts.push('后端：' + be.join('、'));
+  if (te.length) parts.push('测试：' + te.join('、'));
+  const suffix = parts.length ? `（${parts.join('、')}）` : '';
+  const text = `* ${_ccpTitle}${suffix}`;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('自定义内容已复制 ✓');
+    closeCcpPopup();
+  });
+});
+
+// 初始化
+renderHistory();
+</script>
+</body>
+</html>
