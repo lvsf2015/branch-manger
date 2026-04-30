@@ -25,7 +25,7 @@
       display: flex;
       gap: 20px;
       width: 100%;
-      max-width: 1100px;
+      max-width: 1220px;
       height: 100%;
       align-items: flex-start;
     }
@@ -38,7 +38,7 @@
       border-top: 3px solid #4f46e5;
     }
     .panel-left  {
-      flex: 0 0 420px;
+      flex: 0 0 500px;
       max-height: 100%;
       overflow-y: auto;
       scrollbar-width: thin;
@@ -236,6 +236,24 @@
       border-color: #c4b5fd;
       transform: translateY(-1px);
     }
+    .calendar-today-btn {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid #bbf7d0;
+      border-radius: 999px;
+      background: #f0fdf4;
+      color: #15803d;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .calendar-today-btn:hover {
+      background: #dcfce7;
+      border-color: #86efac;
+      transform: translateY(-1px);
+    }
     .calendar-weekdays,
     .calendar-grid {
       display: grid;
@@ -252,10 +270,13 @@
       font-weight: 600;
       padding: 4px 0;
     }
+    .calendar-weekday.is-weekend {
+      color: #16a34a;
+    }
     .calendar-day {
       min-height: 58px;
       border-radius: 10px;
-      padding: 7px 6px 6px;
+      padding: 7px 0 6px 6px;
       background: rgba(255,255,255,0.88);
       border: 1px solid transparent;
       display: flex;
@@ -298,13 +319,28 @@
       outline: 2px solid #8b5cf6;
       outline-offset: 2px;
     }
+    .calendar-day-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
     .calendar-day-number {
       font-size: 13px;
       font-weight: 700;
       color: #2d2354;
+      flex-shrink: 0;
     }
     .calendar-day.is-other-month .calendar-day-number {
       color: #b8b2d2;
+    }
+    .calendar-day.is-weekend .calendar-day-number,
+    .calendar-day.is-holiday .calendar-day-number {
+      color: #16a34a;
+    }
+    .calendar-day.is-workday .calendar-day-number {
+      color: #ef4444;
     }
     .calendar-day-meta {
       min-height: 16px;
@@ -312,6 +348,28 @@
       align-items: center;
       gap: 4px;
       width: 100%;
+    }
+    .calendar-badge {
+      max-width: 100%;
+      font-size: 10px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .calendar-badge.is-holiday {
+      color: #16a34a;
+    }
+    .calendar-badge.is-workday {
+      color: #dc2626;
+    }
+    .calendar-day.is-other-month .calendar-badge.is-holiday {
+      color: #86d3a3;
+    }
+    .calendar-day.is-other-month .calendar-badge.is-workday {
+      color: #f1a1a1;
     }
     .calendar-day-count {
       font-size: 10px;
@@ -830,6 +888,7 @@
         </div>
         <div class="calendar-nav">
           <button class="calendar-nav-btn" id="calendarPrevBtn" title="上个月">‹</button>
+          <button class="calendar-today-btn" id="calendarTodayBtn" title="回到今天">今天</button>
           <button class="calendar-nav-btn" id="calendarNextBtn" title="下个月">›</button>
         </div>
       </div>
@@ -1032,6 +1091,51 @@ function generateBranchName(bugDesc) {
 
 // ---------- 左侧月视图日历 ----------
 const CALENDAR_WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+// 2026 年节假日安排依据中国政府网：
+// https://www.gov.cn/gongbao/2025/issue_12406/202511/content_7048922.html
+const HOLIDAY_LABELS = {
+  '2026-01-01': '元旦',
+  '2026-01-02': '元旦',
+  '2026-01-03': '元旦',
+  '2026-02-15': '春节',
+  '2026-02-16': '春节',
+  '2026-02-17': '春节',
+  '2026-02-18': '春节',
+  '2026-02-19': '春节',
+  '2026-02-20': '春节',
+  '2026-02-21': '春节',
+  '2026-02-22': '春节',
+  '2026-02-23': '春节',
+  '2026-04-04': '清明',
+  '2026-04-05': '清明',
+  '2026-04-06': '清明',
+  '2026-05-01': '劳动节',
+  '2026-05-02': '劳动节',
+  '2026-05-03': '劳动节',
+  '2026-05-04': '劳动节',
+  '2026-05-05': '劳动节',
+  '2026-06-19': '端午',
+  '2026-06-20': '端午',
+  '2026-06-21': '端午',
+  '2026-09-25': '中秋',
+  '2026-09-26': '中秋',
+  '2026-09-27': '中秋',
+  '2026-10-01': '国庆',
+  '2026-10-02': '国庆',
+  '2026-10-03': '国庆',
+  '2026-10-04': '国庆',
+  '2026-10-05': '国庆',
+  '2026-10-06': '国庆',
+  '2026-10-07': '国庆',
+};
+const WORKDAY_LABELS = {
+  '2026-01-04': '班',
+  '2026-02-14': '班',
+  '2026-02-28': '班',
+  '2026-05-09': '班',
+  '2026-09-20': '班',
+  '2026-10-10': '班',
+};
 const calendarState = (() => {
   const now = new Date();
   return { year: now.getFullYear(), month: now.getMonth(), selectedDate: '' };
@@ -1077,9 +1181,35 @@ function syncCalendarSelectionFromFilters() {
   calendarState.selectedDate = dateFrom && dateTo && dateFrom === dateTo ? dateFrom : '';
 }
 
+function getShortHolidayLabel(label) {
+  const labelMap = {
+    '劳动节': '劳动',
+    '春节': '春节',
+    '清明': '清明',
+    '端午': '端午',
+    '中秋': '中秋',
+    '国庆': '国庆',
+    '元旦': '元旦',
+  };
+  return labelMap[label] || label;
+}
+
+function getCalendarBadge(date, key) {
+  if (WORKDAY_LABELS[key]) {
+    return { text: WORKDAY_LABELS[key], className: 'is-workday' };
+  }
+  if (HOLIDAY_LABELS[key]) {
+    return { text: getShortHolidayLabel(HOLIDAY_LABELS[key]), className: 'is-holiday' };
+  }
+  return null;
+}
+
 function renderCalendarWeekdays() {
   const weekdaysEl = document.getElementById('calendarWeekdays');
-  weekdaysEl.innerHTML = CALENDAR_WEEKDAYS.map(day => `<div class="calendar-weekday">${day}</div>`).join('');
+  weekdaysEl.innerHTML = CALENDAR_WEEKDAYS.map((day, index) => {
+    const isWeekend = index === 0 || index === 6;
+    return `<div class="calendar-weekday${isWeekend ? ' is-weekend' : ''}">${day}</div>`;
+  }).join('');
 }
 
 function renderCalendar() {
@@ -1121,21 +1251,29 @@ function renderCalendar() {
 
     const key = toLocalDateKey(cellDate);
     const count = countMap[key] || 0;
+    const badge = getCalendarBadge(cellDate, key);
+    const isWeekend = cellDate.getDay() === 0 || cellDate.getDay() === 6;
     if (inCurrentMonth) monthRecordCount += count;
 
     const isSelected = calendarState.selectedDate === key;
+    const badgeInfo = badge ? badge.className : '';
     const classes = [
       'calendar-day',
       inCurrentMonth ? 'is-current-month' : 'is-other-month',
+      isWeekend ? 'is-weekend' : '',
       key === todayKey ? 'is-today' : '',
       count > 0 ? 'has-record' : '',
       'is-clickable',
       isSelected ? 'is-selected' : '',
+      badgeInfo,
     ].filter(Boolean).join(' ');
 
     cells.push(`
       <button type="button" class="${classes}" data-date="${key}" data-current-month="${inCurrentMonth ? '1' : '0'}" title="${key}${count ? ` · ${count} 条记录` : ''}">
-        <div class="calendar-day-number">${cellDate.getDate()}</div>
+        <div class="calendar-day-top">
+          <div class="calendar-day-number">${cellDate.getDate()}</div>
+          ${badge ? `<span class="calendar-badge ${badge.className}">${badge.text}</span>` : ''}
+        </div>
         <div class="calendar-day-meta">
           ${count > 0 ? '<span class="calendar-day-dot"></span>' : ''}
           ${count > 0 ? `<span class="calendar-day-count">${count}</span>` : ''}
@@ -1307,9 +1445,42 @@ function syncMainInputClear() {
   inputClear.style.display = mainInput.value.trim() ? 'flex' : 'none';
 }
 
+function replaceMainInput(value) {
+  mainInput.value = value;
+  document.getElementById('error').style.display = 'none';
+  syncMainInputClear();
+  mainInput.focus();
+  const len = mainInput.value.length;
+  if (typeof mainInput.setSelectionRange === 'function') {
+    mainInput.setSelectionRange(len, len);
+  }
+}
+
+function isEditableElement(el) {
+  if (!el || !(el instanceof Element)) return false;
+  return el.matches('input, textarea, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]');
+}
+
 mainInput.addEventListener('input', () => {
   document.getElementById('error').style.display = 'none';
   syncMainInputClear();
+});
+
+document.addEventListener('paste', (e) => {
+  const target = e.target;
+  const text = e.clipboardData?.getData('text/plain') || '';
+  if (!text) return;
+
+  if (target === mainInput) {
+    e.preventDefault();
+    replaceMainInput(text.trim());
+    return;
+  }
+
+  if (isEditableElement(target)) return;
+
+  e.preventDefault();
+  replaceMainInput(text.trim());
 });
 
 inputClear.addEventListener('click', () => {
@@ -1408,6 +1579,13 @@ document.getElementById('calendarNextBtn').addEventListener('click', () => {
     calendarState.month = 0;
     calendarState.year += 1;
   }
+  renderCalendar();
+});
+
+document.getElementById('calendarTodayBtn').addEventListener('click', () => {
+  const now = new Date();
+  calendarState.year = now.getFullYear();
+  calendarState.month = now.getMonth();
   renderCalendar();
 });
 
