@@ -107,6 +107,7 @@ function renderHistory(keyword, dateFrom, dateTo) {
       : '';
   }
   if (typeof updateQuotaColor === 'function') updateQuotaColor(all.length);
+  if (typeof renderCalendar === 'function') renderCalendar();
 
   if (list.length === 0) {
     ul.innerHTML = `<div class="history-empty">${hasFilter ? '无匹配记录' : '暂无历史记录'}</div>`;
@@ -167,20 +168,9 @@ function renderHistory(keyword, dateFrom, dateTo) {
 
   ul.innerHTML = html;
 
-  // 默认展开最近3天（今天、昨天、前天），折叠更早日期
-  const _today = new Date();
-  _today.setHours(0, 0, 0, 0);
-  const _recentCutoff = new Date(_today);
-  _recentCutoff.setDate(_today.getDate() - 2);
-
   ul.querySelectorAll('.date-group-header').forEach(header => {
     const key       = header.dataset.group;
     const items     = ul.querySelector(`.date-group-items[data-group-items="${key}"]`);
-    const groupDate = new Date(key + 'T00:00:00');
-    if (groupDate < _recentCutoff) {
-      header.classList.add('collapsed');
-      items.classList.add('collapsed');
-    }
     header.addEventListener('click', () => {
       header.classList.toggle('collapsed');
       items.classList.toggle('collapsed');
