@@ -16,6 +16,27 @@ function saveHistory(list) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
 }
 
+function getDefaultTester(branch) {
+  branch = branch || '';
+  if (branch.startsWith('max')) return '关帅';
+  if (branch.startsWith('benchi')) return '赵仰杰';
+  if (branch.startsWith('yiyuan')) return '吕帅锋';
+  return '李韶娜';
+}
+
+function getBranchCopyPrefix(branch) {
+  branch = branch || '';
+  if (/-Fix-/.test(branch)) return '* 修复';
+  if (/-Dev-/.test(branch)) return '* 迭代';
+  return '';
+}
+
+function formatReadmeCopyText(branch, title, suffix) {
+  const prefix = getBranchCopyPrefix(branch);
+  const body = `${prefix ? '  ' : ''}* ${title}${suffix || ''}`;
+  return prefix ? `${prefix}\n${body}` : body;
+}
+
 /** 新增一条记录，若 branch 相同则移除旧记录再置顶 */
 function addHistory(title, branch) {
   let list = loadHistory();
@@ -194,10 +215,9 @@ function renderHistory(keyword, dateFrom, dateTo) {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const branch = btn.dataset.branch || '';
-      let tester = '李韶娜';
-      if (branch.startsWith('yiyuan')) tester = '吕帅锋';
-      else if (branch.startsWith('benchi')) tester = '赵仰杰';
-      const text = `* ${btn.dataset.title}（前端：吕帅锋、测试：${tester}）`;
+      const tester = getDefaultTester(branch);
+      const suffix = `（前端：吕帅锋、测试：${tester}）`;
+      const text = formatReadmeCopyText(branch, btn.dataset.title, suffix);
       copyText(text, btn, `README描述已复制`);
     });
   });

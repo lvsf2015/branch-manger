@@ -2,8 +2,9 @@
 
 /**
  * 根据 bug 描述自动生成 git 分支名
- * 用法：node gen-branch.js "<bug描述>"
+ * 用法：node gen-branch.js [--env auto|benchi|yiyuan|max|other] "<bug描述>"
  * 示例：node gen-branch.js "16453【奔驰环境】lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"
+ * 示例：node gen-branch.js --env benchi "16453 lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"
  */
 
 // ---------- 工具函数 ----------
@@ -53,24 +54,35 @@ function extractSummary(desc) {
 
 /**
  * 判断描述属于哪种环境
- * @returns {'yiyuan' | 'benchi' | 'other'}
+ * @returns {'yiyuan' | 'benchi' | 'max' | 'other'}
  */
 function detectEnv(desc) {
   if (/移远/.test(desc)) return 'yiyuan';
   if (/奔驰/.test(desc)) return 'benchi';
+  if (/海外|国外/.test(desc)) return 'max';
   return 'other';
+}
+
+/**
+ * 标准化手动选择的环境。auto 表示继续按描述自动识别。
+ * @returns {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other'}
+ */
+function normalizeEnv(env) {
+  return ['auto', 'yiyuan', 'benchi', 'max', 'other'].includes(env) ? env : 'auto';
 }
 
 /**
  * 生成分支名
  * @param {string} bugDesc - 原始 bug 描述字符串
+ * @param {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other'} selectedEnv - 手动选择的环境
  * @returns {string} 分支名
  */
-function generateBranchName(bugDesc) {
+function generateBranchName(bugDesc, selectedEnv = 'auto') {
   const id = extractId(bugDesc);
   const summary = extractSummary(bugDesc);
   const date = formatDate(new Date());
-  const env = detectEnv(bugDesc);
+  const manualEnv = normalizeEnv(selectedEnv);
+  const env = manualEnv === 'auto' ? detectEnv(bugDesc) : manualEnv;
   const author = 'lvshuaif';
   // 编号恰好 5 位用 Fix，否则用 Dev
   const tag = /^\d{5}$/.test(id) ? 'Fix' : 'Dev';
@@ -80,9 +92,35 @@ function generateBranchName(bugDesc) {
       return `yiyuan-master-A-${tag}-${id}-${author}-${date}-${summary}`;
     case 'benchi':
       return `benchi-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'max':
+      return `max-master-A-${tag}-${id}-${author}-${date}-${summary}`;
     default:
       return `one-master-A-${tag}-${id}-${author}-${date}-${summary}`;
   }
+}
+
+function parseArgs(args) {
+  let selectedEnv = 'auto';
+  const descParts = [];
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--env' || arg === '-e') {
+      selectedEnv = normalizeEnv(args[i + 1]);
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--env=')) {
+      selectedEnv = normalizeEnv(arg.slice('--env='.length));
+      continue;
+    }
+    descParts.push(arg);
+  }
+
+  return {
+    selectedEnv,
+    bugDesc: descParts.join(' '),
+  };
 }
 
 // ---------- 主逻辑 ----------
@@ -91,12 +129,18 @@ const args = process.argv.slice(2);
 
 if (args.length === 0) {
   console.error('请提供 bug 描述作为参数');
-  console.error('示例：node gen-branch.js "16453【奔驰环境】lightning版本审批步骤中缺少审批通过操作"');
+  console.error('示例：node gen-branch.js --env benchi "16453 lightning版本审批步骤中缺少审批通过操作"');
   process.exit(1);
 }
 
-const bugDesc = args.join(' ');
-const branchName = generateBranchName(bugDesc);
+const { bugDesc, selectedEnv } = parseArgs(args);
+
+if (!bugDesc.trim()) {
+  console.error('请提供 bug 描述作为参数');
+  process.exit(1);
+}
+
+const branchName = generateBranchName(bugDesc, selectedEnv);
 
 console.log(branchName);
 

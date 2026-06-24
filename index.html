@@ -122,6 +122,26 @@
     }
     .example-tag:hover { background: #ddd6fe; }
 
+    .env-row {
+      margin-top: 12px;
+    }
+    .env-select {
+      width: 100%;
+      padding: 9px 34px 9px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .env-select:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
+    }
+
     .gen-btn {
       margin-top: 16px;
       width: 100%;
@@ -867,6 +887,17 @@
       <span class="example-tag" data-v="1234【奔驰环境】非5位编号Dev示例">Dev示例</span>
     </div>
 
+    <div class="env-row">
+      <label for="envSelect">环境</label>
+      <select class="env-select" id="envSelect">
+        <option value="auto">自动识别</option>
+        <option value="benchi">奔驰环境</option>
+        <option value="yiyuan">移远环境</option>
+        <option value="max">海外环境</option>
+        <option value="other">其他 / one-master</option>
+      </select>
+    </div>
+
     <div class="error-msg" id="error">请输入 Bug 描述</div>
 
     <button class="gen-btn" id="genBtn">生 成</button>
@@ -1071,11 +1102,16 @@ function detectEnv(desc) {
   return 'other';
 }
 
-function generateBranchName(bugDesc) {
+function normalizeEnv(env) {
+  return ['auto', 'yiyuan', 'benchi', 'max', 'other'].includes(env) ? env : 'auto';
+}
+
+function generateBranchName(bugDesc, selectedEnv = 'auto') {
   const id      = extractId(bugDesc);
   const summary = extractSummary(bugDesc);
   const date    = formatDate(new Date());
-  const env     = detectEnv(bugDesc);
+  const manualEnv = normalizeEnv(selectedEnv);
+  const env     = manualEnv === 'auto' ? detectEnv(bugDesc) : manualEnv;
   const author  = 'lvshuaif';
   const tag     = /^\d{5}$/.test(id) ? 'Fix' : 'Dev';
 
@@ -1085,6 +1121,27 @@ function generateBranchName(bugDesc) {
     case 'max':    return `max-master-A-${tag}-${id}-${author}-${date}-${summary}`;
     default:       return `one-master-A-${tag}-${id}-${author}-${date}-${summary}`;
   }
+}
+
+function getDefaultTester(branch) {
+  branch = branch || '';
+  if (branch.startsWith('max')) return '关帅';
+  if (branch.startsWith('benchi')) return '赵仰杰';
+  if (branch.startsWith('yiyuan')) return '吕帅锋';
+  return '李韶娜';
+}
+
+function getBranchCopyPrefix(branch) {
+  branch = branch || '';
+  if (/-Fix-/.test(branch)) return '* 修复';
+  if (/-Dev-/.test(branch)) return '* 迭代';
+  return '';
+}
+
+function formatReadmeCopyText(branch, title, suffix) {
+  const prefix = getBranchCopyPrefix(branch);
+  const body = `${prefix ? '  ' : ''}* ${title}${suffix || ''}`;
+  return prefix ? `${prefix}\n${body}` : body;
 }
 
 // 历史记录逻辑由 history.js 提供
@@ -1419,6 +1476,7 @@ document.getElementById('genBtn').addEventListener('click', () => {
   const resultText = document.getElementById('resultText');
 
   const desc = input.value.trim();
+  const selectedEnv = document.getElementById('envSelect').value;
   if (!desc) {
     errEl.style.display = 'block';
     resultBox.style.display = 'none';
@@ -1426,7 +1484,7 @@ document.getElementById('genBtn').addEventListener('click', () => {
   }
   errEl.style.display = 'none';
 
-  const branch = generateBranchName(desc);
+  const branch = generateBranchName(desc, selectedEnv);
   resultText.textContent = branch;
   resultBox.style.display = 'block';
 
@@ -1718,10 +1776,12 @@ function openCustomCopyPopup(btn, title, branch) {
   _ccpBranch = branch;
   const popup = document.getElementById('ccpPopup');
 
-  // 每次打开重置所有选中，然后默认选前端第一个 + 测试第一个
+  // 每次打开重置所有选中，然后默认选前端第一个 + 分支对应测试
   popup.querySelectorAll('.ccp-chip').forEach(c => c.classList.remove('selected'));
   const firstFe = popup.querySelector('#ccpFrontend .ccp-chip');
-  const firstTe = popup.querySelector('#ccpTester   .ccp-chip');
+  const defaultTester = getDefaultTester(branch);
+  const firstTe = popup.querySelector(`#ccpTester .ccp-chip[data-name="${defaultTester}"]`)
+    || popup.querySelector('#ccpTester .ccp-chip');
   if (firstFe) firstFe.classList.add('selected');
   if (firstTe) firstTe.classList.add('selected');
 
@@ -1748,9 +1808,17 @@ function closeCcpPopup() {
 document.getElementById('ccpClose').addEventListener('click', closeCcpPopup);
 document.getElementById('ccpCancel').addEventListener('click', closeCcpPopup);
 
-// chip 点击切换
+// chip 点击切换：前端/后端支持多选，测试人保持单选
 document.querySelectorAll('.ccp-chip').forEach(chip => {
-  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+  chip.addEventListener('click', () => {
+    if (chip.closest('#ccpTester')) {
+      document.querySelectorAll('#ccpTester .ccp-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      return;
+    }
+
+    chip.classList.toggle('selected');
+  });
 });
 
 // 点击弹窗外关闭
@@ -1777,7 +1845,7 @@ document.getElementById('ccpCopyBtn').addEventListener('click', () => {
   if (be.length) parts.push('后端：' + be.join('、'));
   if (te.length) parts.push('测试：' + te.join('、'));
   const suffix = parts.length ? `（${parts.join('、')}）` : '';
-  const text = `* ${_ccpTitle}${suffix}`;
+  const text = formatReadmeCopyText(_ccpBranch, _ccpTitle, suffix);
   navigator.clipboard.writeText(text).then(() => {
     showToast('自定义内容已复制 ✓');
     closeCcpPopup();
