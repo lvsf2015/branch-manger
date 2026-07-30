@@ -25,7 +25,7 @@
       display: flex;
       gap: 20px;
       width: 100%;
-      max-width: 1220px;
+      max-width: 1280px;
       height: 100%;
       align-items: flex-start;
     }
@@ -38,15 +38,12 @@
       border-top: 3px solid #4f46e5;
     }
     .panel-left  {
-      flex: 0 0 500px;
+      flex: 0 0 600px;
       max-height: 100%;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #c4b5fd transparent;
+      overflow: hidden;
+      padding: 24px 28px 22px;
     }
-    .panel-left::-webkit-scrollbar { width: 6px; }
-    .panel-left::-webkit-scrollbar-track { background: transparent; }
-    .panel-left::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #c4b5fd, #8b5cf6); border-radius: 999px; }
+    .panel-left h1 { margin-bottom: 14px; }
     .panel-right { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
     h1 {
@@ -66,10 +63,19 @@
     .input-wrap {
       position: relative;
     }
+    .input-action-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .input-action-row .input-wrap {
+      flex: 1;
+      min-width: 0;
+    }
 
     textarea {
       width: 100%;
-      height: 88px;
+      height: 120px;
       padding: 10px 34px 10px 12px;
       border: 1px solid #d9d9d9;
       border-radius: 8px;
@@ -104,48 +110,88 @@
       color: #ef4444;
     }
 
-    .examples {
-      margin-top: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .example-tag {
-      font-size: 12px;
-      color: #4f46e5;
-      background: #ede9fe;
-      border-radius: 4px;
-      padding: 2px 8px;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.15s;
-    }
-    .example-tag:hover { background: #ddd6fe; }
-
     .env-row {
       margin-top: 12px;
     }
-    .env-select {
-      width: 100%;
-      padding: 9px 34px 9px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      background: #fff;
-      color: #1a1a1a;
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    .env-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
     }
-    .env-select:focus {
+    .env-option {
+      position: relative;
+      cursor: pointer;
+      margin: 0;
+    }
+    .env-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .env-option span {
+      display: block;
+      padding: 7px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 999px;
+      background: #fff;
+      color: #555;
+      font-size: 12px;
+      line-height: 1;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+    .env-option:hover span {
+      border-color: #a78bfa;
+      color: #4f46e5;
+      background: #f5f3ff;
+    }
+    .env-option input:checked + span {
+      border-color: #7c3aed;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.24);
+    }
+    .env-option input:focus-visible + span {
       border-color: #4f46e5;
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
     }
+    .custom-prefix-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 2px;
+    }
+    .custom-prefix-wrap[hidden] { display: none; }
+    .custom-prefix-input {
+      flex: 1;
+      min-width: 0;
+      height: 34px;
+      padding: 0 11px;
+      border: 1px solid #d9d5e6;
+      border-radius: 8px;
+      background: #fff;
+      color: #302c40;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .custom-prefix-input:focus {
+      border-color: #8b7ff4;
+      box-shadow: 0 0 0 3px rgba(91, 76, 240, 0.10);
+    }
+    .custom-prefix-suffix {
+      flex-shrink: 0;
+      color: #9a96a8;
+      font-size: 11px;
+    }
 
     .gen-btn {
-      margin-top: 16px;
-      width: 100%;
-      padding: 12px;
+      flex: 0 0 92px;
+      width: 92px;
+      height: 120px;
+      margin: 0;
+      padding: 10px;
       background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
       color: #fff;
       border: none;
@@ -194,12 +240,10 @@
     .copy-btn:hover { background: linear-gradient(135deg, #4338ca, #6d28d9); box-shadow: 0 3px 12px rgba(79, 70, 229, 0.44); transform: translateY(-1px); }
     .copy-btn.copied { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.32); }
 
-    .error-msg { margin-top: 8px; font-size: 13px; color: #ef4444; display: none; }
-
     /* -------- 左侧月视图日历 -------- */
     .calendar-card {
-      margin-top: 18px;
-      padding: 16px 16px 14px;
+      margin-top: 12px;
+      padding: 12px 12px 10px;
       border: 1px solid #ebe8ff;
       border-radius: 12px;
       background:
@@ -211,7 +255,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
       gap: 10px;
     }
     .calendar-title-wrap { min-width: 0; }
@@ -274,35 +318,52 @@
       border-color: #86efac;
       transform: translateY(-1px);
     }
+    .calendar-default-btn {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid #d7d7d7;
+      border-radius: 999px;
+      background: #fff;
+      color: #444;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .calendar-default-btn:hover {
+      border-color: #aaa;
+      background: #e9e9e9;
+      transform: translateY(-1px);
+    }
     .calendar-weekdays,
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 6px;
+      gap: 4px;
     }
     .calendar-weekdays {
-      margin-bottom: 6px;
+      margin-bottom: 2px;
     }
     .calendar-weekday {
       text-align: center;
       font-size: 11px;
       color: #8b87a8;
       font-weight: 600;
-      padding: 4px 0;
+      padding: 2px 0;
     }
     .calendar-weekday.is-weekend {
       color: #16a34a;
     }
     .calendar-day {
-      min-height: 58px;
-      border-radius: 10px;
-      padding: 7px 0 6px 6px;
+      min-height: 40px;
+      border-radius: 8px;
+      padding: 5px 6px;
       background: rgba(255,255,255,0.88);
       border: 1px solid transparent;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      justify-content: space-between;
+      justify-content: center;
       transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
       width: 100%;
       text-align: left;
@@ -343,11 +404,12 @@
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       min-width: 0;
     }
     .calendar-day-number {
-      font-size: 13px;
+      font-size: 15px;
+      line-height: 1;
       font-weight: 700;
       color: #2d2354;
       flex-shrink: 0;
@@ -362,12 +424,12 @@
     .calendar-day.is-workday .calendar-day-number {
       color: #ef4444;
     }
-    .calendar-day-meta {
-      min-height: 16px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
+    .calendar-day-count-inline {
+      flex-shrink: 0;
+      color: #7658e8;
+      font-size: 9px;
+      line-height: 1;
+      font-weight: 600;
     }
     .calendar-badge {
       max-width: 100%;
@@ -390,22 +452,6 @@
     }
     .calendar-day.is-other-month .calendar-badge.is-workday {
       color: #f1a1a1;
-    }
-    .calendar-day-count {
-      font-size: 10px;
-      font-weight: 700;
-      color: #6d28d9;
-      background: #ede9fe;
-      border-radius: 999px;
-      padding: 2px 6px;
-      margin-left: auto;
-    }
-    .calendar-day-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
     }
     .calendar-empty {
       font-size: 12px;
@@ -446,6 +492,7 @@
       border-radius: 99px; overflow: hidden; min-width: 80px; max-width: 140px;
     }
     .quota-bar-fill {
+      display: block;
       height: 100%; width: 0%;
       background: linear-gradient(90deg, #34d399, #10b981);
       border-radius: 99px;
@@ -500,7 +547,7 @@
     .search-wrap { position: relative; margin-bottom: 10px; }
     .search-input {
       width: 100%;
-      padding: 8px 28px 8px 32px;
+      padding: 8px 66px 8px 32px;
       border: 1px solid #d9d9d9;
       border-radius: 8px;
       font-size: 13px;
@@ -520,17 +567,25 @@
     }
     .search-clear {
       position: absolute;
-      right: 8px;
+      right: 6px;
       top: 50%;
       transform: translateY(-50%);
-      color: #bbb;
-      font-size: 16px;
+      height: 26px;
+      padding: 0 9px;
+      border: none;
+      border-radius: 7px;
+      background: #f1eff8;
+      color: #777287;
+      font-size: 11px;
       cursor: pointer;
       display: none;
-      line-height: 1;
+      align-items: center;
+      justify-content: center;
+      line-height: 26px;
       user-select: none;
     }
-    .search-clear:hover { color: #888; }
+    .search-clear:hover { color: #4f46e5; background: #e8e4ff; }
+    .search-clear[hidden] { display: none; }
 
     /* 日期筛选栏 */
     .filter-bar {
@@ -545,6 +600,29 @@
       border-radius: 8px;
     }
     .filter-label { font-size: 12px; color: #888; flex-shrink: 0; }
+    .date-presets {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .date-preset {
+      padding: 7px 8px;
+      border: 1px solid #dedbe9;
+      border-radius: 7px;
+      background: #fff;
+      color: #686477;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .date-preset:hover { border-color: #aaa0f5; color: #5142db; }
+    .date-preset.active {
+      border-color: #6d5ee8;
+      color: #fff;
+      background: #6d5ee8;
+      box-shadow: 0 3px 9px rgba(91, 76, 240, 0.18);
+    }
     .date-input {
       padding: 5px 8px;
       border: 1px solid #d9d9d9;
@@ -557,12 +635,6 @@
     }
     .date-input:focus { border-color: #4f46e5; }
     .filter-sep { font-size: 12px; color: #bbb; }
-    .filter-reset {
-      font-size: 12px; color: #bbb; background: none; border: none;
-      cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
-    }
-    .filter-reset:hover { color: #4f46e5; }
-
     /* 一键展开/折叠按钮 */
     .toggle-all-btn {
       font-size: 12px; color: #4f46e5; background: #ede9fe;
@@ -864,43 +936,614 @@
       background: #f5f3ff;
       color: #4f46e5;
     }
+
+    /* -------- 视觉优化：统一工作台布局 -------- */
+    :root {
+      --primary: #202123;
+      --primary-dark: #111214;
+      --primary-soft: #ececec;
+      --text-main: #202123;
+      --text-secondary: #6f6f6f;
+      --line: #dedede;
+      --surface: #fff;
+    }
+    body {
+      position: relative;
+      background: #fff;
+      padding: 0;
+    }
+    body::before {
+      display: none;
+    }
+    .layout {
+      position: relative;
+      z-index: 1;
+      gap: 0;
+      max-width: none;
+    }
+    .panel {
+      position: relative;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .panel-left {
+      order: 2;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100%;
+      padding: 28px clamp(26px, 3vw, 48px) 24px;
+      background: #fff;
+      border-right: none;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-right {
+      order: 1;
+      flex: 0 0 clamp(350px, 28vw, 420px);
+      padding: 24px 20px 20px;
+      background: #f7f7f8;
+      border-right: 1px solid #e6e6e8;
+    }
+    .panel-left > .panel-heading,
+    .panel-left > .result-box,
+    .panel-left > .env-row,
+    .panel-left > .bug-label,
+    .panel-left > .input-action-row {
+      width: min(100%, 920px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .panel-left > .panel-heading { order: 1; }
+    .panel-left > .result-box { order: 2; }
+    .panel-left > .generator-empty-state { order: 3; }
+    .panel-left > .env-row {
+      order: 4;
+      margin-top: auto;
+    }
+    .panel-left > .bug-label {
+      order: 5;
+      margin-top: 10px;
+    }
+    .panel-left > .input-action-row { order: 6; }
+    .generator-empty-state {
+      flex: 1;
+      width: min(100%, 920px);
+      min-height: 180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .generator-empty-state[hidden] { display: none; }
+    .empty-state-mark {
+      width: 58px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      border: 3px solid #b9b9b9;
+      border-radius: 18px 22px 19px 21px;
+      color: #8a8a8a;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      transform: rotate(-2deg);
+    }
+    .empty-state-title {
+      color: #202123;
+      font-size: clamp(24px, 2.5vw, 36px);
+      line-height: 1.2;
+      font-weight: 500;
+      letter-spacing: -0.8px;
+    }
+    .empty-state-hint {
+      margin-top: 10px;
+      color: #929292;
+      font-size: 13px;
+    }
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      margin-bottom: 15px;
+    }
+    .panel-heading-main { min-width: 0; flex: 1; }
+    .panel-heading h1 {
+      margin: 0;
+      color: var(--text-main);
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: -0.2px;
+    }
+    .panel-subtitle {
+      margin-top: 3px;
+      color: #9793a8;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .panel-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      background: #ececec;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+    .calendar-trigger {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border: 1px solid #d8d8d8;
+      border-radius: 10px;
+      background: #fff;
+      color: #333;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .calendar-trigger:hover,
+    .calendar-trigger.active { border-color: #aaa; background: #ececec; }
+    .calendar-popover {
+      position: absolute;
+      top: 76px;
+      right: max(24px, calc((100% - 920px) / 2));
+      z-index: 80;
+      width: min(720px, calc(100% - 48px));
+    }
+    .calendar-popover[hidden] { display: none; }
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    label { color: #535353; font-weight: 500; }
+    textarea,
+    .search-input,
+    .threshold-input,
+    .date-input {
+      border-color: var(--line);
+      background: #fcfcfe;
+      color: var(--text-main);
+    }
+    textarea {
+      border-radius: 11px;
+      line-height: 1.45;
+      resize: none;
+      box-shadow: inset 0 1px 2px rgba(42, 38, 80, 0.025);
+    }
+    textarea:hover,
+    .search-input:hover { border-color: #bdbdbd; }
+    textarea:focus,
+    .search-input:focus,
+    .threshold-input:focus,
+    .date-input:focus {
+      border-color: #8a8a8a;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.07);
+    }
+    .env-row {
+      margin-top: 12px;
+      padding: 10px 11px;
+      border: 1px solid #dedede;
+      border-radius: 12px;
+      background: #f7f7f7;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .env-row.needs-selection {
+      border-color: #f0a14a;
+      box-shadow: 0 0 0 3px rgba(240, 161, 74, 0.12);
+    }
+    .env-options { gap: 7px; }
+    .env-option span {
+      padding: 7px 12px;
+      border-color: #d7d7d7;
+      background: #fff;
+      color: #555;
+    }
+    .env-option input:checked + span {
+      border-color: var(--primary);
+      background: var(--primary);
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.16);
+    }
+    .gen-btn {
+      border-radius: 10px;
+      background: var(--primary);
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+    }
+    .gen-btn:hover {
+      background: #000;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.20);
+    }
+    .result-box {
+      padding: 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 11px;
+      background: #f7f7f7;
+    }
+    .result-text { border: none; background: transparent; padding: 4px 6px; }
+    .calendar-card {
+      border-color: #dedede;
+      border-radius: 14px;
+      background: #f7f7f7;
+      box-shadow: none;
+    }
+    .calendar-popover .calendar-card {
+      width: 100%;
+      margin: 0;
+      background: #fff;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .calendar-label { color: #707070; letter-spacing: 1.1px; }
+    .calendar-day {
+      background: rgba(255,255,255,0.82);
+      border-radius: 8px;
+    }
+    .calendar-day.is-current-month {
+      border-color: #dedede;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    .calendar-day.has-record {
+      background: #efefef;
+    }
+    .calendar-day-count-inline { color: #737373; }
+    .calendar-nav-btn {
+      border-color: #d7d7d7;
+      color: #333;
+    }
+    .calendar-nav-btn:hover { background: #e9e9e9; border-color: #c7c7c7; }
+    .calendar-day.is-selected {
+      border-color: #555;
+      background: #e8e8e8;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .history-header {
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .history-header .panel-heading { margin-bottom: 0; }
+    .history-count {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 7px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #4f4f4f;
+      background: #e9e9e9;
+      font-size: 10px;
+    }
+    .quota-wrap { gap: 5px; margin-left: 7px; }
+    .quota-bar-track { min-width: 48px; max-width: 72px; background: #dedede; }
+    .history-tools {
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #dedede;
+      border-radius: 12px;
+      background: #f3f3f3;
+    }
+    .search-wrap { margin-bottom: 9px; }
+    .search-input { border-radius: 9px; background: #fff; }
+    .threshold-bar { margin-bottom: 8px; padding: 0 2px; }
+    .filter-bar {
+      position: relative;
+      margin-bottom: 0;
+      border: none;
+      border-top: 1px solid #dedede;
+      border-radius: 0;
+      background: transparent;
+      padding: 9px 2px 0;
+    }
+    .date-presets { gap: 5px; }
+    .date-more-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid #dedbe9;
+      border-radius: 7px;
+      background: #fff;
+      color: #666;
+      cursor: pointer;
+    }
+    .date-more-btn:hover,
+    .date-more-btn.active { border-color: #aaa; background: #e9e9e9; color: #202123; }
+    .date-presets-extra {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      width: 100%;
+      padding-left: 36px;
+    }
+    .date-presets-extra[hidden] { display: none; }
+    .export-btn,
+    .copy-btn,
+    .ccp-copy-btn {
+      background: var(--primary);
+      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.14);
+    }
+    .export-btn,
+    .clear-btn {
+      min-width: 48px;
+      white-space: nowrap;
+    }
+    .export-btn { padding: 6px 11px; border-radius: 8px; }
+    .clear-btn { padding: 5px 9px; border-radius: 8px; background: #fff; }
+    .date-preset.active {
+      border-color: #202123;
+      background: #202123;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.15);
+    }
+    .toggle-all-btn {
+      border-color: #d2d2d2;
+      border-radius: 8px;
+      color: #444;
+      background: #fff;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .date-group-header {
+      margin-top: 3px;
+      padding: 10px 8px 7px;
+      color: #565267;
+      border-bottom-color: #dedede;
+    }
+    .date-group-items { gap: 7px; padding: 5px 2px 2px; }
+    .history-item {
+      padding: 10px 12px;
+      border-color: #dedede;
+      border-left: 1px solid #dedede;
+      border-radius: 10px;
+      background: #fff;
+    }
+    .history-item:hover {
+      border-color: #bdbdbd;
+      border-left-color: #555;
+      background: #f6f6f6;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
+    }
+    .hi-time { color: #383838; }
+    .hi-branch-text { color: #2f2f2f; }
+    .history-header .panel-heading-main h1 { flex-wrap: wrap; row-gap: 4px; }
+    .calendar-title { color: #202123; }
+    .calendar-subtitle,
+    .calendar-weekday { color: #777; }
+    .calendar-day-number { color: #202123; }
+    .calendar-day.is-clickable:hover {
+      border-color: #aaa;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    }
+    .calendar-day:focus-visible { outline-color: #555; }
+    .env-option:hover span {
+      border-color: #a9a9a9;
+      color: #202123;
+      background: #f0f0f0;
+    }
+    .custom-prefix-input:focus {
+      border-color: #8a8a8a;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.07);
+    }
+    .copy-btn:hover,
+    .export-btn:hover,
+    .ccp-copy-btn:hover {
+      background: #000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.17);
+    }
+    .toggle-all-btn:hover {
+      border-color: #aaa;
+      color: #202123;
+      background: #e9e9e9;
+    }
+    .date-group-header:hover { color: #202123; }
+    .search-clear:hover { color: #202123; background: #e5e5e5; }
+    .hi-icon-btn:hover { background: #e8e8e8; }
+    .modal-btn.primary {
+      border-color: #202123;
+      background: #202123;
+    }
+    .modal-btn.primary:hover { border-color: #000; background: #000; }
+    .history-list:hover { scrollbar-color: #aaa #ececec; }
+    .history-list:hover::-webkit-scrollbar-track { background: #ececec; }
+    .history-list:hover::-webkit-scrollbar-thumb,
+    .history-list:hover::-webkit-scrollbar-thumb:hover { background: #aaa; }
+    .sidebar-settings {
+      flex-shrink: 0;
+      position: relative;
+      margin: 12px -20px -20px;
+      padding: 8px 12px;
+      border-top: 1px solid #dedede;
+      background: #f1f1f1;
+    }
+    .sidebar-settings-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      min-height: 38px;
+      padding: 0 10px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: #333;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .sidebar-settings-trigger:hover,
+    .sidebar-settings-trigger.active { background: #e2e2e2; }
+    .settings-trigger-label { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+    .settings-trigger-summary { color: #777; font-size: 11px; font-weight: 500; }
+    .settings-popover {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: calc(100% + 8px);
+      z-index: 90;
+      padding: 14px;
+      border: 1px solid #d8d8d8;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.16), 0 2px 7px rgba(0,0,0,0.06);
+    }
+    .settings-popover[hidden] { display: none; }
+    .sidebar-settings-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 11px;
+      color: #333;
+      font-size: 12px;
+      font-weight: 650;
+      justify-content: space-between;
+    }
+    .settings-close {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #777;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .settings-close:hover { background: #ececec; color: #222; }
+    .settings-usage-row,
+    .settings-threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      margin-bottom: 9px;
+      color: #666;
+      font-size: 11px;
+    }
+    .settings-label,
+    .settings-threshold-row label {
+      flex-shrink: 0;
+      margin: 0;
+      color: #555;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .settings-usage-row .quota-wrap {
+      display: flex;
+      flex: 1;
+      justify-content: flex-end;
+      gap: 7px;
+      min-width: 0;
+      margin: 0;
+    }
+    .settings-usage-row .quota-bar-track {
+      flex: 1;
+      min-width: 50px;
+      max-width: none;
+      height: 6px;
+    }
+    .settings-threshold-row .threshold-input {
+      width: 54px;
+      background: #fff;
+    }
+    .settings-threshold-row .threshold-hint {
+      min-width: 0;
+      color: #8b8b8b;
+      line-height: 1.25;
+    }
+    .settings-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 11px;
+    }
+    .settings-actions button {
+      flex: 1;
+      min-width: 0;
+      height: 32px;
+    }
+
+    @media (max-width: 1120px) and (min-width: 981px) {
+      .panel-right { flex-basis: 340px; }
+      .panel { padding-left: 24px; padding-right: 24px; }
+    }
+    @media (max-width: 980px) {
+      body { padding: 0; }
+      .layout { gap: 0; }
+      .panel-left, .panel-right { width: 100%; height: auto; padding: 22px 20px; }
+      .panel-left {
+        order: 1;
+        flex: none;
+        overflow: visible;
+        border-right: none;
+        border-bottom: 1px solid #e6e6e8;
+      }
+      .panel-right {
+        order: 2;
+        flex: none;
+        max-height: 70vh;
+        border-right: none;
+      }
+      .panel-left > .env-row { margin-top: 12px; }
+      .calendar-popover {
+        left: 20px;
+        right: 20px;
+        width: auto;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="layout">
 
-  <!-- 左侧：生成器 -->
+  <!-- 右侧主工作区：生成器 -->
   <div class="panel panel-left">
-    <h1>🌿 分支名生成器</h1>
-
-    <label>Bug 描述（编号 + 标题）</label>
-    <div class="input-wrap">
-      <textarea id="input" placeholder="例：16453【奔驰环境】lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"></textarea>
-      <span class="input-clear" id="inputClear" title="清空">×</span>
+    <div class="panel-heading">
+      <span class="panel-icon" aria-hidden="true">🌿</span>
+      <div class="panel-heading-main">
+        <h1>分支名生成器</h1>
+        <div class="panel-subtitle">快速生成规范、清晰的 Git 分支名称</div>
+      </div>
+      <button type="button" class="calendar-trigger" id="calendarTrigger" aria-label="打开分支日历" aria-expanded="false" title="分支日历">▦</button>
     </div>
 
-    <div class="examples">
-      <span class="example-tag" data-v="16453【奔驰环境】lightning版本审批步骤中缺少审批通过操作">奔驰示例</span>
-      <span class="example-tag" data-v="16453【移远环境】报表前端导出顺序异常需要修复">移远示例</span>
-      <span class="example-tag" data-v="16453【生产环境】用户登录报错无法访问">其他示例</span>
-      <span class="example-tag" data-v="1234【奔驰环境】非5位编号Dev示例">Dev示例</span>
+    <label class="bug-label">Bug 描述（编号 + 标题）</label>
+    <div class="input-action-row">
+      <div class="input-wrap">
+        <textarea id="input" aria-label="Bug 描述"></textarea>
+        <span class="input-clear" id="inputClear" title="清空">×</span>
+      </div>
+      <button class="gen-btn" id="genBtn">生成</button>
     </div>
 
     <div class="env-row">
-      <label for="envSelect">环境</label>
-      <select class="env-select" id="envSelect">
-        <option value="auto">自动识别</option>
-        <option value="benchi">奔驰环境</option>
-        <option value="yiyuan">移远环境</option>
-        <option value="max">海外环境</option>
-        <option value="other">其他 / one-master</option>
-      </select>
+      <div class="env-options" role="radiogroup" aria-label="环境选择">
+        <label class="env-option"><input type="radio" name="env" value="auto" checked /><span>自动识别</span></label>
+        <label class="env-option"><input type="radio" name="env" value="benchi" /><span>奔驰环境</span></label>
+        <label class="env-option"><input type="radio" name="env" value="yiyuan" /><span>移远环境</span></label>
+        <label class="env-option"><input type="radio" name="env" value="max" /><span>海外环境</span></label>
+        <label class="env-option"><input type="radio" name="env" value="other" /><span>one-master-A</span></label>
+        <label class="env-option"><input type="radio" name="env" value="one-master-b" /><span>one-master-B</span></label>
+        <label class="env-option"><input type="radio" name="env" value="custom" /><span>自定义前缀</span></label>
+        <div class="custom-prefix-wrap" id="customPrefixWrap" hidden>
+          <input class="custom-prefix-input" id="customPrefixInput" aria-label="自定义分支前缀" placeholder="例如：customer-master-A" autocomplete="off" />
+          <span class="custom-prefix-suffix">自动拼接 Fix / Dev、编号和描述</span>
+        </div>
+      </div>
     </div>
-
-    <div class="error-msg" id="error">请输入 Bug 描述</div>
-
-    <button class="gen-btn" id="genBtn">生 成</button>
 
     <div class="result-box" id="resultBox">
       <div class="result-label">生成结果</div>
@@ -910,64 +1553,107 @@
       </div>
     </div>
 
-    <div class="calendar-card">
-      <div class="calendar-header">
-        <div class="calendar-title-wrap">
-          <div class="calendar-label">Calendar</div>
-          <div class="calendar-title" id="calendarTitle"></div>
-          <div class="calendar-subtitle" id="calendarSubtitle"></div>
+    <div class="generator-empty-state" id="generatorEmptyState">
+      <div class="empty-state-mark" aria-hidden="true">›_</div>
+      <div class="empty-state-title">准备创建哪个分支？</div>
+      <div class="empty-state-hint">粘贴 Bug 描述，选择环境后即可生成</div>
+    </div>
+
+    <div class="calendar-popover" id="calendarPopover" hidden>
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <div class="calendar-title-wrap">
+            <div class="calendar-label">BRANCH CALENDAR</div>
+            <div class="calendar-title" id="calendarTitle"></div>
+            <div class="calendar-subtitle" id="calendarSubtitle"></div>
+          </div>
+          <div class="calendar-nav">
+            <button class="calendar-default-btn" id="calendarDefaultBtn" title="回到今天并清除筛选">默认</button>
+            <button class="calendar-nav-btn" id="calendarPrevBtn" title="上个月">‹</button>
+            <button class="calendar-today-btn" id="calendarTodayBtn" title="回到今天">今天</button>
+            <button class="calendar-nav-btn" id="calendarNextBtn" title="下个月">›</button>
+          </div>
         </div>
-        <div class="calendar-nav">
-          <button class="calendar-nav-btn" id="calendarPrevBtn" title="上个月">‹</button>
-          <button class="calendar-today-btn" id="calendarTodayBtn" title="回到今天">今天</button>
-          <button class="calendar-nav-btn" id="calendarNextBtn" title="下个月">›</button>
-        </div>
+        <div class="calendar-weekdays" id="calendarWeekdays"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-empty" id="calendarEmpty" style="display:none;">当前月份暂无分支生成记录</div>
       </div>
-      <div class="calendar-weekdays" id="calendarWeekdays"></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
-      <div class="calendar-empty" id="calendarEmpty" style="display:none;">当前月份暂无分支生成记录</div>
     </div>
   </div>
 
-  <!-- 右侧：历史记录 -->
+  <!-- 左侧栏：历史记录 -->
   <div class="panel panel-right">
     <div class="history-header">
-      <h1 style="display:flex;align-items:center;min-width:0;flex:1;">
-        📋 历史记录<span class="history-count" id="historyCount"></span>
-        <span class="quota-wrap" id="historyQuota" style="display:none;">
-          <span class="quota-bar-track"><span class="quota-bar-fill" id="quotaBarFill"></span></span>
-          <span class="quota-label" id="quotaLabel"></span>
-        </span>
-      </h1>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="export-btn" id="exportBtn">导出</button>
-        <button class="clear-btn" id="clearBtn">清空</button>
+      <div class="panel-heading">
+        <span class="panel-icon" aria-hidden="true">📋</span>
+        <div class="panel-heading-main">
+          <h1 style="display:flex;align-items:center;min-width:0;">
+            历史记录<span class="history-count" id="historyCount"></span>
+          </h1>
+          <div class="panel-subtitle">查找、复制和管理最近生成的分支</div>
+        </div>
       </div>
     </div>
 
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input class="search-input" id="searchInput" placeholder="搜索标题或分支名…" />
-      <span class="search-clear" id="searchClear">×</span>
-    </div>
+    <div class="history-tools">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="搜索标题或分支名…" />
+        <button type="button" class="search-clear" id="searchClear" aria-label="清空搜索内容" hidden>清空</button>
+      </div>
 
-    <div class="threshold-bar">
-      <label for="thresholdInput">提醒阈值</label>
-      <input class="threshold-input" type="number" id="thresholdInput" min="1" max="500" value="80" />
-      <span class="threshold-hint">条，超出后创建分支时提示备份清理</span>
-    </div>
-
-    <div class="filter-bar">
-      <span class="filter-label">日期</span>
-      <input class="date-input" type="date" id="dateFrom" />
-      <span class="filter-sep">—</span>
-      <input class="date-input" type="date" id="dateTo" />
-      <button class="filter-reset" id="dateReset">重置</button>
-      <button class="toggle-all-btn" id="toggleAllBtn">折叠全部</button>
+      <div class="filter-bar">
+        <span class="filter-label">日期</span>
+        <div class="date-presets" aria-label="快捷日期筛选">
+          <button type="button" class="date-preset" data-date-range="today">今天</button>
+          <button type="button" class="date-preset" data-date-range="recent-week">近 7 天</button>
+          <button type="button" class="date-preset" data-date-range="month">本月</button>
+          <button type="button" class="date-preset" data-date-range="all">全部</button>
+          <button type="button" class="date-more-btn" id="moreDatesBtn" aria-label="展开更多日期筛选" aria-expanded="false" title="更多日期">•••</button>
+        </div>
+        <div class="date-presets-extra" id="extraDatePresets" hidden>
+          <button type="button" class="date-preset" data-date-range="yesterday">昨天</button>
+          <button type="button" class="date-preset" data-date-range="week">本周</button>
+          <button type="button" class="date-preset" data-date-range="last-week">上周</button>
+          <button type="button" class="date-preset" data-date-range="last-month">上月</button>
+        </div>
+        <input type="hidden" id="dateFrom" />
+        <input type="hidden" id="dateTo" />
+        <button class="toggle-all-btn" id="toggleAllBtn" aria-label="折叠全部" title="折叠全部">▴</button>
+      </div>
     </div>
 
     <div class="history-list" id="historyList">
       <div class="history-empty">暂无历史记录</div>
+    </div>
+
+    <div class="sidebar-settings">
+      <button type="button" class="sidebar-settings-trigger" id="settingsTrigger" aria-expanded="false">
+        <span class="settings-trigger-label"><span aria-hidden="true">⚙</span> 设置与用量</span>
+        <span class="settings-trigger-summary" id="settingsUsageSummary">0 / 500</span>
+      </button>
+      <div class="settings-popover" id="settingsPopover" hidden>
+        <div class="sidebar-settings-title">
+          <span>设置与用量</span>
+          <button type="button" class="settings-close" id="settingsClose" aria-label="关闭设置">×</button>
+        </div>
+        <div class="settings-usage-row">
+          <span class="settings-label">历史记录用量</span>
+          <span class="quota-wrap" id="historyQuota">
+            <span class="quota-bar-track"><span class="quota-bar-fill" id="quotaBarFill"></span></span>
+            <span class="quota-label" id="quotaLabel"></span>
+          </span>
+        </div>
+        <div class="settings-threshold-row">
+          <label for="thresholdInput">提醒阈值</label>
+          <input class="threshold-input" type="number" id="thresholdInput" min="1" max="500" value="80" />
+          <span class="threshold-hint">条，达到后提醒清理</span>
+        </div>
+        <div class="settings-actions">
+          <button class="export-btn" id="exportBtn">导出记录</button>
+          <button class="clear-btn" id="clearBtn">清空记录</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1042,6 +1728,17 @@
   <span class="toast-close" id="toastClose" title="关闭">×</span>
 </div>
 
+<!-- 环境冲突提示弹窗 -->
+<div class="modal-mask" id="envConflictModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="envConflictTitle">
+    <h2 id="envConflictTitle">检测到多个环境</h2>
+    <p id="envConflictDesc"></p>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="confirmEnvConflict">手动选择环境</button>
+    </div>
+  </div>
+</div>
+
 <!-- 单条删除确认弹窗 -->
 <div class="modal-mask" id="delModal">
   <div class="modal">
@@ -1095,18 +1792,40 @@ function extractSummary(desc) {
   return engTokens.length > 0 ? engTokens.join('-') : 'fix';
 }
 
+const ENV_RULES = [
+  { env: 'yiyuan', label: '移远环境', pattern: /移远/ },
+  { env: 'benchi', label: '奔驰环境', pattern: /奔驰/ },
+  { env: 'max', label: '海外环境', pattern: /海外|国外/ },
+  { env: 'one-master-b', label: 'one-master-B', pattern: /B\s*分支|one-master-B/i },
+];
+
+function detectEnvMatches(desc) {
+  return ENV_RULES.filter(rule => rule.pattern.test(desc));
+}
+
 function detectEnv(desc) {
-  if (/移远/.test(desc)) return 'yiyuan';
-  if (/奔驰/.test(desc)) return 'benchi';
-  if (/海外|国外/.test(desc)) return 'max';
-  return 'other';
+  return detectEnvMatches(desc)[0]?.env || 'other';
 }
 
 function normalizeEnv(env) {
-  return ['auto', 'yiyuan', 'benchi', 'max', 'other'].includes(env) ? env : 'auto';
+  return ['auto', 'yiyuan', 'benchi', 'max', 'other', 'one-master-b', 'custom'].includes(env) ? env : 'auto';
 }
 
-function generateBranchName(bugDesc, selectedEnv = 'auto') {
+function normalizeCustomPrefix(value) {
+  return String(value || '').trim().replace(/-+$/, '');
+}
+
+function isValidCustomPrefix(value) {
+  return Boolean(value)
+    && /^[\p{L}\p{N}._/-]+$/u.test(value)
+    && !value.startsWith('.')
+    && !value.startsWith('/')
+    && !/[./]$/.test(value)
+    && !value.includes('..')
+    && !value.includes('//');
+}
+
+function generateBranchName(bugDesc, selectedEnv = 'auto', customPrefix = '') {
   const id      = extractId(bugDesc);
   const summary = extractSummary(bugDesc);
   const date    = formatDate(new Date());
@@ -1119,6 +1838,8 @@ function generateBranchName(bugDesc, selectedEnv = 'auto') {
     case 'yiyuan': return `yiyuan-master-A-${tag}-${id}-${author}-${date}-${summary}`;
     case 'benchi': return `benchi-${tag}-${id}-${author}-${date}-${summary}`;
     case 'max':    return `max-master-A-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'one-master-b': return `one-master-B-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'custom': return `${normalizeCustomPrefix(customPrefix)}-${tag}-${id}-${author}-${date}-${summary}`;
     default:       return `one-master-A-${tag}-${id}-${author}-${date}-${summary}`;
   }
 }
@@ -1142,6 +1863,10 @@ function formatReadmeCopyText(branch, title, suffix) {
   const prefix = getBranchCopyPrefix(branch);
   const body = `${prefix ? '  ' : ''}* ${title}${suffix || ''}`;
   return prefix ? `${prefix}\n${body}` : body;
+}
+
+function normalizeBugDescription(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
 // 历史记录逻辑由 history.js 提供
@@ -1329,11 +2054,8 @@ function renderCalendar() {
       <button type="button" class="${classes}" data-date="${key}" data-current-month="${inCurrentMonth ? '1' : '0'}" title="${key}${count ? ` · ${count} 条记录` : ''}">
         <div class="calendar-day-top">
           <div class="calendar-day-number">${cellDate.getDate()}</div>
+          ${count > 0 ? `<span class="calendar-day-count-inline">(${count})</span>` : ''}
           ${badge ? `<span class="calendar-badge ${badge.className}">${badge.text}</span>` : ''}
-        </div>
-        <div class="calendar-day-meta">
-          ${count > 0 ? '<span class="calendar-day-dot"></span>' : ''}
-          ${count > 0 ? `<span class="calendar-day-count">${count}</span>` : ''}
         </div>
       </button>
     `);
@@ -1366,15 +2088,25 @@ let _toastTimer = null;
 function showToast(msg, type) {
   const el   = document.getElementById('toast');
   const text = document.getElementById('toastText');
+  const icon = el.querySelector('.toast-icon');
   text.textContent = msg;
   el.classList.remove('toast-error', 'toast-warning');
   if (type === 'error')   el.classList.add('toast-error');
   if (type === 'warning') el.classList.add('toast-warning');
+  icon.innerHTML = type === 'error'
+    ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>'
+    : type === 'warning'
+      ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2v4M5 8v.1" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = type === 'warning'
     ? null
-    : setTimeout(() => el.classList.remove('show'), 2200);
+    : setTimeout(() => el.classList.remove('show'), type === 'error' ? 2800 : 2200);
+}
+
+function showError(message) {
+  showToast(message, 'error');
 }
 
 function copyText(text, btn, toastMsg) {
@@ -1389,12 +2121,58 @@ function copyText(text, btn, toastMsg) {
       setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
     }
     showToast(toastMsg || '已复制 ✓');
-  });
+  }).catch(() => showError('复制失败，请手动复制'));
 }
 
 // 点击关闭按钮手动关闭 warning Toast
 document.getElementById('toastClose').addEventListener('click', () => {
   document.getElementById('toast').classList.remove('show');
+});
+
+// ---------- 环境选择 ----------
+const customPrefixWrap = document.getElementById('customPrefixWrap');
+const customPrefixInput = document.getElementById('customPrefixInput');
+const envRow = document.querySelector('.env-row');
+let _pendingEnvMatches = [];
+
+document.querySelectorAll('input[name="env"]').forEach(input => {
+  input.addEventListener('change', () => {
+    customPrefixWrap.hidden = input.value !== 'custom';
+    envRow.classList.remove('needs-selection');
+    if (input.value === 'custom') requestAnimationFrame(() => customPrefixInput.focus());
+  });
+});
+
+function resetEnvironmentSelection() {
+  const autoEnv = document.querySelector('input[name="env"][value="auto"]');
+  if (!autoEnv) return;
+  autoEnv.checked = true;
+  customPrefixInput.value = '';
+  autoEnv.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+customPrefixInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('genBtn').click();
+});
+
+function openEnvConflictModal(matches) {
+  _pendingEnvMatches = matches.map(match => match.env);
+  document.getElementById('envConflictDesc').textContent =
+    `描述中同时识别到“${matches.map(match => match.label).join('”和“')}”。请手动选择正确的环境后再生成。`;
+  document.getElementById('envConflictModal').classList.add('show');
+}
+
+function closeEnvConflictModal(focusEnvironment) {
+  document.getElementById('envConflictModal').classList.remove('show');
+  if (!focusEnvironment) return;
+  envRow.classList.add('needs-selection');
+  const firstMatch = document.querySelector(`input[name="env"][value="${_pendingEnvMatches[0] || 'other'}"]`);
+  if (firstMatch) firstMatch.focus();
+}
+
+document.getElementById('confirmEnvConflict').addEventListener('click', () => closeEnvConflictModal(true));
+document.getElementById('envConflictModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeEnvConflictModal(true);
 });
 
 // ---------- 单条删除弹窗 ----------
@@ -1471,25 +2249,45 @@ function exportMarkdown(suffix) {
 
 document.getElementById('genBtn').addEventListener('click', () => {
   const input      = document.getElementById('input');
-  const errEl      = document.getElementById('error');
   const resultBox  = document.getElementById('resultBox');
   const resultText = document.getElementById('resultText');
 
-  const desc = input.value.trim();
-  const selectedEnv = document.getElementById('envSelect').value;
+  const desc = normalizeBugDescription(input.value);
+  const selectedEnv = document.querySelector('input[name="env"]:checked')?.value || 'auto';
   if (!desc) {
-    errEl.style.display = 'block';
     resultBox.style.display = 'none';
+    showError('请输入 Bug 描述');
+    input.focus();
     return;
   }
-  errEl.style.display = 'none';
+  input.value = desc;
+  syncMainInputClear();
 
-  const branch = generateBranchName(desc, selectedEnv);
+  if (selectedEnv === 'auto') {
+    const envMatches = detectEnvMatches(desc);
+    if (envMatches.length > 1) {
+      resultBox.style.display = 'none';
+      openEnvConflictModal(envMatches);
+      return;
+    }
+  }
+
+  const customPrefix = normalizeCustomPrefix(document.getElementById('customPrefixInput').value);
+  if (selectedEnv === 'custom' && !isValidCustomPrefix(customPrefix)) {
+    resultBox.style.display = 'none';
+    showError('请输入有效的自定义分支前缀');
+    document.getElementById('customPrefixInput').focus();
+    return;
+  }
+
+  const branch = generateBranchName(desc, selectedEnv, customPrefix);
   resultText.textContent = branch;
   resultBox.style.display = 'block';
+  document.getElementById('generatorEmptyState').hidden = true;
 
   navigator.clipboard.writeText(branch).catch(() => {});
   addHistory(desc, branch);
+  resetEnvironmentSelection();
 });
 
 document.getElementById('copyBtn').addEventListener('click', () => {
@@ -1504,8 +2302,7 @@ function syncMainInputClear() {
 }
 
 function replaceMainInput(value) {
-  mainInput.value = value;
-  document.getElementById('error').style.display = 'none';
+  mainInput.value = normalizeBugDescription(value);
   syncMainInputClear();
   mainInput.focus();
   const len = mainInput.value.length;
@@ -1520,7 +2317,6 @@ function isEditableElement(el) {
 }
 
 mainInput.addEventListener('input', () => {
-  document.getElementById('error').style.display = 'none';
   syncMainInputClear();
 });
 
@@ -1531,25 +2327,25 @@ document.addEventListener('paste', (e) => {
 
   if (target === mainInput) {
     e.preventDefault();
-    replaceMainInput(text.trim());
+    replaceMainInput(text);
     return;
   }
 
   if (isEditableElement(target)) return;
 
   e.preventDefault();
-  replaceMainInput(text.trim());
+  replaceMainInput(text);
 });
 
 inputClear.addEventListener('click', () => {
   mainInput.value = '';
-  document.getElementById('error').style.display = 'none';
   syncMainInputClear();
   mainInput.focus();
 });
 
 // 清空按钮 → 弹窗
 document.getElementById('clearBtn').addEventListener('click', () => {
+  setSettingsPopover(false);
   if (loadHistory().length === 0) return;
   document.getElementById('clearModal').classList.add('show');
 });
@@ -1576,15 +2372,6 @@ document.getElementById('clearModal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('show');
 });
 
-// 示例标签
-document.querySelectorAll('.example-tag').forEach(el => {
-  el.addEventListener('click', () => {
-    mainInput.value = el.dataset.v;
-    document.getElementById('error').style.display = 'none';
-    syncMainInputClear();
-  });
-});
-
 // ---------- 筛选 ----------
 
 function applyFilters() {
@@ -1592,6 +2379,7 @@ function applyFilters() {
   const from = document.getElementById('dateFrom').value;
   const to   = document.getElementById('dateTo').value;
   syncCalendarSelectionFromFilters();
+  updateDatePresetState();
   renderHistory(kw, from, to);
 }
 
@@ -1599,26 +2387,153 @@ const searchInput = document.getElementById('searchInput');
 const searchClear = document.getElementById('searchClear');
 
 searchInput.addEventListener('input', () => {
-  searchClear.style.display = searchInput.value.trim() ? 'block' : 'none';
+  searchClear.hidden = !searchInput.value;
+  searchClear.style.display = searchInput.value ? 'flex' : 'none';
   applyFilters();
 });
 
 searchClear.addEventListener('click', () => {
   searchInput.value = '';
+  searchClear.hidden = true;
+  searchClear.style.display = 'none';
+  applyFilters();
+  searchInput.focus();
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || !searchInput.value) return;
+  searchInput.value = '';
+  searchClear.hidden = true;
   searchClear.style.display = 'none';
   applyFilters();
 });
 
-document.getElementById('dateFrom').addEventListener('change', applyFilters);
-document.getElementById('dateTo').addEventListener('change', applyFilters);
-document.getElementById('dateReset').addEventListener('click', () => {
-  document.getElementById('dateFrom').value = '';
-  document.getElementById('dateTo').value   = '';
-  applyFilters();
+// ---------- 侧栏与日历浮层 ----------
+const settingsTrigger = document.getElementById('settingsTrigger');
+const settingsPopover = document.getElementById('settingsPopover');
+const calendarTrigger = document.getElementById('calendarTrigger');
+const calendarPopover = document.getElementById('calendarPopover');
+const moreDatesBtn = document.getElementById('moreDatesBtn');
+const extraDatePresets = document.getElementById('extraDatePresets');
+
+function setSettingsPopover(open) {
+  settingsPopover.hidden = !open;
+  settingsTrigger.classList.toggle('active', open);
+  settingsTrigger.setAttribute('aria-expanded', String(open));
+}
+
+function setCalendarPopover(open) {
+  calendarPopover.hidden = !open;
+  calendarTrigger.classList.toggle('active', open);
+  calendarTrigger.setAttribute('aria-expanded', String(open));
+}
+
+function setExtraDatePresets(open) {
+  extraDatePresets.hidden = !open;
+  moreDatesBtn.classList.toggle('active', open);
+  moreDatesBtn.setAttribute('aria-expanded', String(open));
+}
+
+settingsTrigger.addEventListener('click', () => {
+  const shouldOpen = settingsPopover.hidden;
+  setCalendarPopover(false);
+  setSettingsPopover(shouldOpen);
+});
+document.getElementById('settingsClose').addEventListener('click', () => setSettingsPopover(false));
+
+calendarTrigger.addEventListener('click', () => {
+  const shouldOpen = calendarPopover.hidden;
+  setSettingsPopover(false);
+  setCalendarPopover(shouldOpen);
 });
 
-document.getElementById('exportBtn').addEventListener('click', () => exportMarkdown());
+moreDatesBtn.addEventListener('click', () => setExtraDatePresets(extraDatePresets.hidden));
+
+document.addEventListener('click', (e) => {
+  if (!settingsPopover.hidden && !settingsPopover.contains(e.target) && !settingsTrigger.contains(e.target)) {
+    setSettingsPopover(false);
+  }
+  if (!calendarPopover.hidden && !calendarPopover.contains(e.target) && !calendarTrigger.contains(e.target)) {
+    setCalendarPopover(false);
+  }
+  if (!extraDatePresets.hidden && !extraDatePresets.contains(e.target) && !moreDatesBtn.contains(e.target)) {
+    setExtraDatePresets(false);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  setSettingsPopover(false);
+  setCalendarPopover(false);
+  setExtraDatePresets(false);
+});
+
+function getDatePresetRange(range) {
+  const today = new Date();
+  const end = toLocalDateKey(today);
+  if (range === 'today') return { from: end, to: end };
+  if (range === 'yesterday') {
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateKey = toLocalDateKey(yesterday);
+    return { from: dateKey, to: dateKey };
+  }
+  if (range === 'recent-week') {
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    return { from: toLocalDateKey(start), to: end };
+  }
+  if (range === 'week') {
+    const start = new Date(today);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    return { from: toLocalDateKey(start), to: end };
+  }
+  if (range === 'last-week') {
+    const thisMonday = new Date(today);
+    thisMonday.setDate(thisMonday.getDate() - ((thisMonday.getDay() + 6) % 7));
+    const start = new Date(thisMonday);
+    start.setDate(start.getDate() - 7);
+    const lastSunday = new Date(thisMonday);
+    lastSunday.setDate(lastSunday.getDate() - 1);
+    return { from: toLocalDateKey(start), to: toLocalDateKey(lastSunday) };
+  }
+  if (range === 'month') {
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    return { from: toLocalDateKey(start), to: end };
+  }
+  if (range === 'last-month') {
+    const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+    return { from: toLocalDateKey(start), to: toLocalDateKey(lastDay) };
+  }
+  return { from: '', to: '' };
+}
+
+function updateDatePresetState() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  document.querySelectorAll('.date-preset').forEach(btn => {
+    const range = getDatePresetRange(btn.dataset.dateRange);
+    btn.classList.toggle('active', from === range.from && to === range.to);
+  });
+}
+
+document.querySelectorAll('.date-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const range = getDatePresetRange(btn.dataset.dateRange);
+    document.getElementById('dateFrom').value = range.from;
+    document.getElementById('dateTo').value = range.to;
+    applyFilters();
+    if (btn.closest('.date-presets-extra')) setExtraDatePresets(false);
+  });
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  exportMarkdown();
+  setSettingsPopover(false);
+});
 syncMainInputClear();
+updateDatePresetState();
 renderCalendarWeekdays();
 renderCalendar();
 
@@ -1645,6 +2560,16 @@ document.getElementById('calendarTodayBtn').addEventListener('click', () => {
   calendarState.year = now.getFullYear();
   calendarState.month = now.getMonth();
   renderCalendar();
+});
+
+document.getElementById('calendarDefaultBtn').addEventListener('click', () => {
+  const now = new Date();
+  calendarState.year = now.getFullYear();
+  calendarState.month = now.getMonth();
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  setExtraDatePresets(false);
+  applyFilters();
 });
 
 // 一键展开/折叠
@@ -1692,8 +2617,8 @@ function updateQuotaColor(count) {
   const wrap  = document.getElementById('historyQuota');
   const fill  = document.getElementById('quotaBarFill');
   const label = document.getElementById('quotaLabel');
+  const summary = document.getElementById('settingsUsageSummary');
   if (!wrap || !fill || !label) return;
-  if (count <= 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'flex';
   const pct       = Math.min(100, Math.round(count / HISTORY_MAX * 100));
   const threshold = getThreshold();
@@ -1702,6 +2627,7 @@ function updateQuotaColor(count) {
   fill.className   = 'quota-bar-fill' + (level ? ' ' + level : '');
   label.className  = 'quota-label'    + (level ? ' ' + level : '');
   label.textContent = `${count} / ${HISTORY_MAX}`;
+  if (summary) summary.textContent = `${count} / ${HISTORY_MAX}`;
 }
 
 // 阈值输入框初始化与监听
@@ -1849,7 +2775,7 @@ document.getElementById('ccpCopyBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(text).then(() => {
     showToast('自定义内容已复制 ✓');
     closeCcpPopup();
-  });
+  }).catch(() => showError('复制失败，请手动复制'));
 });
 
 // 初始化

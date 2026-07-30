@@ -257,13 +257,16 @@ function renderHistory(keyword, dateFrom, dateTo) {
   });
 }
 
-/** 更新一键展开/折叠按钮文案 */
+/** 更新一键展开/折叠按钮图标与可访问说明 */
 function updateToggleAllBtn() {
   const btn = document.getElementById('toggleAllBtn');
   if (!btn) return;
   const ul = document.getElementById('historyList');
   const hasCollapsed = ul.querySelector('.date-group-header.collapsed');
-  btn.textContent = hasCollapsed ? '展开全部' : '折叠全部';
+  const label = hasCollapsed ? '展开全部' : '折叠全部';
+  btn.textContent = hasCollapsed ? '▾' : '▴';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
 }
 
 /** 高亮关键词（作用于已 escapeHtml 过的字符串） */

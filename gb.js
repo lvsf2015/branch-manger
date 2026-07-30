@@ -2,7 +2,7 @@
 
 /**
  * 根据 bug 描述自动生成 git 分支名
- * 用法：node gen-branch.js [--env auto|benchi|yiyuan|max|other] "<bug描述>"
+ * 用法：node gen-branch.js [--env auto|benchi|yiyuan|max|other|one-master-b] "<bug描述>"
  * 示例：node gen-branch.js "16453【奔驰环境】lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"
  * 示例：node gen-branch.js --env benchi "16453 lightning版本审批步骤中缺少「审批通过」操作，期望可以添加"
  */
@@ -54,27 +54,28 @@ function extractSummary(desc) {
 
 /**
  * 判断描述属于哪种环境
- * @returns {'yiyuan' | 'benchi' | 'max' | 'other'}
+ * @returns {'yiyuan' | 'benchi' | 'max' | 'one-master-b' | 'other'}
  */
 function detectEnv(desc) {
   if (/移远/.test(desc)) return 'yiyuan';
   if (/奔驰/.test(desc)) return 'benchi';
   if (/海外|国外/.test(desc)) return 'max';
+  if (/B\s*分支|one-master-B/i.test(desc)) return 'one-master-b';
   return 'other';
 }
 
 /**
  * 标准化手动选择的环境。auto 表示继续按描述自动识别。
- * @returns {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other'}
+ * @returns {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other' | 'one-master-b'}
  */
 function normalizeEnv(env) {
-  return ['auto', 'yiyuan', 'benchi', 'max', 'other'].includes(env) ? env : 'auto';
+  return ['auto', 'yiyuan', 'benchi', 'max', 'other', 'one-master-b'].includes(env) ? env : 'auto';
 }
 
 /**
  * 生成分支名
  * @param {string} bugDesc - 原始 bug 描述字符串
- * @param {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other'} selectedEnv - 手动选择的环境
+ * @param {'auto' | 'yiyuan' | 'benchi' | 'max' | 'other' | 'one-master-b'} selectedEnv - 手动选择的环境
  * @returns {string} 分支名
  */
 function generateBranchName(bugDesc, selectedEnv = 'auto') {
@@ -94,6 +95,8 @@ function generateBranchName(bugDesc, selectedEnv = 'auto') {
       return `benchi-${tag}-${id}-${author}-${date}-${summary}`;
     case 'max':
       return `max-master-A-${tag}-${id}-${author}-${date}-${summary}`;
+    case 'one-master-b':
+      return `one-master-B-${tag}-${id}-${author}-${date}-${summary}`;
     default:
       return `one-master-A-${tag}-${id}-${author}-${date}-${summary}`;
   }
